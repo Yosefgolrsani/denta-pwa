@@ -1,0 +1,11 @@
+{
+  "name": "Denta | مدیریت کلینیک دندان‌پزشکی",
+  "short_name": "Denta",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f8f6",
+  "theme_color": "#087f5b",
+  "description": "دستیار مدیریت کلینیک دندان‌پزشکی"
+}

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#087f5b">
+  <meta name="description" content="دنتا، دستیار مدیریت کلینیک دندان‌پزشکی">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+  <title>دنتا | مدیریت کلینیک</title>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="tooth">✚</span><div><strong>Denta</strong><small>مدیریت هوشمند کلینیک</small></div></div>
+    <button id="themeBtn" class="icon-btn" aria-label="تغییر حالت نمایش">☾</button>
+  </header>
+  <main class="container">
+    <section class="welcome">
+      <span class="eyebrow">پنل مدیریت کلینیک</span>
+      <h1>سلام، خوش آمدید 👋</h1>
+      <p>امروز را با نظم بیشتر در کلینیک شروع کنید.</p>
+    </section>
+
+    <section class="login card" id="loginCard">
+      <h2>ورود به دنتا</h2>
+      <p class="muted">برای ورود، اطلاعات حساب کلینیک را وارد کنید.</p>
+      <label for="email">ایمیل</label>
+      <input id="email" type="email" placeholder="name@example.com" autocomplete="username">
+      <label for="password">رمز عبور</label>
+      <input id="password" type="password" placeholder="رمز عبور" autocomplete="current-password">
+      <button id="loginBtn" class="primary">ورود</button>
+      <p id="loginMessage" class="message" aria-live="polite">اتصال امن به حساب کاربری در مرحله بعد تنظیم می‌شود.</p>
+    </section>
+
+    <section class="dashboard" id="dashboard">
+      <div class="section-title"><h2>نمای کلی</h2><span class="pill">نسخه آزمایشی</span></div>
+      <div class="stats">
+        <article class="stat card"><span>نوبت‌های امروز</span><strong>۰</strong><small>در انتظار ثبت اطلاعات</small></article>
+        <article class="stat card"><span>بیماران</span><strong>۰</strong><small>در انتظار اتصال پایگاه داده</small></article>
+        <article class="stat card"><span>دندان‌پزشکان</span><strong>۱</strong><small>قابل تنظیم از پنل</small></article>
+      </div>
+      <div class="section-title"><h2>دسترسی سریع</h2></div>
+      <div class="quick">
+        <button class="quick-item" type="button"><span>＋</span>ثبت نوبت</button>
+        <button class="quick-item" type="button"><span>♙</span>بیماران</button>
+        <button class="quick-item" type="button"><span>▦</span>تقویم کاری</button>
+        <button class="quick-item" type="button"><span>⚙</span>تنظیمات</button>
+      </div>
+    </section>
+    <footer>دنتا · دستیار مدیریت کلینیک دندان‌پزشکی</footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
