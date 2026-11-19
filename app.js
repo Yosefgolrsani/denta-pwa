@@ -1,5 +1,6 @@
 
 let supabase = null;
+let recoveryMode = false;
 
 const themeBtn = document.getElementById('themeBtn');
 const loginBtn = document.getElementById('loginBtn');
@@ -9,29 +10,23 @@ const loginMessage = document.getElementById('loginMessage');
 const loginCard = document.getElementById('loginCard');
 const dashboard = document.getElementById('dashboard');
 
-let recoveryMode = false;
+// دکمه خروج
+const logoutBtn = document.createElement('button');
+logoutBtn.type = 'button';
+logoutBtn.textContent = 'خروج از حساب';
+logoutBtn.className = 'icon-btn';
+logoutBtn.style.display = 'none';
+document.querySelector('.topbar').appendChild(logoutBtn);
 
-function showMessage(message, error = false) {
-  loginMessage.textContent = message;
-  loginMessage.style.color = error ? '#dc2626' : '';
-}
-
-function showDashboard(isLoggedIn) {
-  loginCard.style.display = isLoggedIn ? 'none' : '';
-  dashboard.style.display = isLoggedIn ? '' : 'none';
-  resetCard.style.display = 'none';
-}
-
-// دکمه فراموشی رمز عبور
+// فرم بازیابی رمز
 const forgotBtn = document.createElement('button');
 forgotBtn.type = 'button';
-forgotBtn.textContent = 'فراموشی رمز عبور؟';
+forgotBtn.textContent = 'فراموشی رمز عبور';
 forgotBtn.style.cssText =
   'display:block;margin:15px auto;padding:10px;border:0;background:transparent;color:#087f5b;font-size:15px;cursor:pointer;';
 
 loginBtn.insertAdjacentElement('afterend', forgotBtn);
 
-// فرم تعیین رمز جدید
 const resetCard = document.createElement('section');
 resetCard.className = 'login card';
 resetCard.style.display = 'none';
@@ -47,10 +42,10 @@ resetCard.innerHTML = `
 
   <label for="confirmPassword">تکرار رمز عبور</label>
   <input id="confirmPassword" type="password"
-    placeholder="تکرار رمز عبور"
+    placeholder="رمز عبور را دوباره وارد کنید"
     autocomplete="new-password">
 
-  <button id="savePasswordBtn" class="primary">
+  <button id="savePasswordBtn" class="primary" type="button">
     ثبت رمز جدید
   </button>
 
@@ -64,12 +59,27 @@ const confirmPasswordInput = resetCard.querySelector('#confirmPassword');
 const savePasswordBtn = resetCard.querySelector('#savePasswordBtn');
 const resetMessage = resetCard.querySelector('#resetMessage');
 
+// نمایش پیام
+function showMessage(message, isError = false) {
+  loginMessage.textContent = message;
+  loginMessage.style.color = isError ? '#dc2626' : '';
+}
+
+// نمایش داشبورد
+function showDashboard(isLoggedIn) {
+  loginCard.style.display = isLoggedIn ? 'none' : '';
+  dashboard.style.display = isLoggedIn ? '' : 'none';
+  resetCard.style.display = 'none';
+  forgotBtn.style.display = isLoggedIn ? 'none' : '';
+}
+
 // نمایش فرم بازیابی
 function showRecoveryForm() {
   recoveryMode = true;
   loginCard.style.display = 'none';
   dashboard.style.display = 'none';
   resetCard.style.display = '';
+  forgotBtn.style.display = 'none';
   logoutBtn.style.display = 'none';
 }
 
@@ -81,19 +91,13 @@ themeBtn.addEventListener('click', () => {
 });
 
 // خروج از حساب
-const logoutBtn = document.createElement('button');
-logoutBtn.textContent = 'خروج از حساب';
-logoutBtn.className = 'icon-btn';
-logoutBtn.style.display = 'none';
-document.querySelector('.topbar').appendChild(logoutBtn);
-
 logoutBtn.addEventListener('click', async () => {
   if (!supabase) return;
 
   const { error } = await supabase.auth.signOut();
 
   if (error) {
-    showMessage('خروج انجام نشد. دوباره تلاش کنید.', true);
+    showMessage('خروج انجام نشد: ' + error.message, true);
     return;
   }
 
@@ -104,7 +108,7 @@ logoutBtn.addEventListener('click', async () => {
   showMessage('با موفقیت از حساب خارج شدید.');
 });
 
-// ارسال ایمیل بازیابی
+// درخواست ایمیل بازیابی
 forgotBtn.addEventListener('click', async () => {
   const email = emailInput.value.trim();
 
@@ -132,18 +136,14 @@ forgotBtn.addEventListener('click', async () => {
 
     if (error) throw error;
 
-    showMessage(
-      'درخواست بازیابی ارسال شد. ایمیل خود را بررسی کنید.'
-    );
+    showMessage('درخواست بازیابی ارسال شد. ایمیل خود را بررسی کنید.');
 
   } catch (error) {
-    showMessage(
-      'ارسال ایمیل ناموفق بود: ' + error.message,
-      true
-    );
+    showMessage('ارسال ایمیل ناموفق بود: ' + error.message, true);
+
   } finally {
     forgotBtn.disabled = false;
-    forgotBtn.textContent = 'فراموشی رمز عبور؟';
+    forgotBtn.textContent = 'فراموشی رمز عبور';
   }
 });
 
@@ -186,6 +186,7 @@ savePasswordBtn.addEventListener('click', async () => {
     resetCard.style.display = 'none';
     loginCard.style.display = '';
     dashboard.style.display = 'none';
+    forgotBtn.style.display = '';
 
     newPasswordInput.value = '';
     confirmPasswordInput.value = '';
@@ -204,7 +205,7 @@ savePasswordBtn.addEventListener('click', async () => {
   }
 });
 
-// راه‌اندازی اتصال Supabase
+// اتصال به Supabase
 async function startDenta() {
   try {
     const configResponse = await fetch('/api/config', {
@@ -217,7 +218,13 @@ async function startDenta() {
 
     const config = await configResponse.json();
 
-    if (!config.supabaseUrl || !config.supabaseKey) {
+    const supabaseUrl = config.supabaseUrl;
+    const supabaseKey =
+      config.supabaseKey ||
+      config.supabaseAnonKey ||
+      config.publishableKey;
+
+    if (!supabaseUrl || !supabaseKey) {
       throw new Error('اطلاعات اتصال Supabase ناقص است.');
     }
 
@@ -225,12 +232,14 @@ async function startDenta() {
       'https://esm.sh/@supabase/supabase-js@2'
     );
 
-    supabase = createClient(
-      config.supabaseUrl,
-      config.supabaseKey
-    );
+    supabase = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    });
 
-    // تشخیص بازگشت از ایمیل بازیابی
     supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         showRecoveryForm();
@@ -255,20 +264,23 @@ async function startDenta() {
     if (error) throw error;
 
     if (!recoveryMode) {
-      const loggedIn = !!data.session;
+      const isLoggedIn = !!data.session;
 
-      showDashboard(loggedIn);
-      logoutBtn.style.display = loggedIn ? '' : 'none';
+      showDashboard(isLoggedIn);
+      logoutBtn.style.display = isLoggedIn ? '' : 'none';
 
       showMessage(
-        loggedIn
+        isLoggedIn
           ? 'به دنتا خوش آمدید.'
-          : 'اتصال امن برقرار شد. برای ورود اطلاعات حساب را وارد کنید.'
+          : 'اتصال امن برقرار شد.'
       );
     }
 
   } catch (error) {
+    supabase = null;
     showDashboard(false);
+    logoutBtn.style.display = 'none';
+
     showMessage(
       'خطا در اتصال: ' + error.message,
       true
@@ -296,8 +308,8 @@ loginBtn.addEventListener('click', async () => {
 
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
+      email: email,
+      password: password
     });
 
     if (error) throw error;
@@ -330,3 +342,4 @@ if ('serviceWorker' in navigator) {
 }
 
 startDenta();
+۹۹
