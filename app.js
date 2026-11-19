@@ -10,7 +10,6 @@ const loginMessage = document.getElementById('loginMessage');
 const loginCard = document.getElementById('loginCard');
 const dashboard = document.getElementById('dashboard');
 
-// دکمه خروج
 const logoutBtn = document.createElement('button');
 logoutBtn.type = 'button';
 logoutBtn.textContent = 'خروج از حساب';
@@ -18,13 +17,11 @@ logoutBtn.className = 'icon-btn';
 logoutBtn.style.display = 'none';
 document.querySelector('.topbar').appendChild(logoutBtn);
 
-// فرم بازیابی رمز
 const forgotBtn = document.createElement('button');
 forgotBtn.type = 'button';
 forgotBtn.textContent = 'فراموشی رمز عبور';
 forgotBtn.style.cssText =
   'display:block;margin:15px auto;padding:10px;border:0;background:transparent;color:#087f5b;font-size:15px;cursor:pointer;';
-
 loginBtn.insertAdjacentElement('afterend', forgotBtn);
 
 const resetCard = document.createElement('section');
@@ -34,21 +31,17 @@ resetCard.style.display = 'none';
 resetCard.innerHTML = `
   <h2>تعیین رمز عبور جدید</h2>
   <p class="muted">رمز عبور جدید خود را وارد کنید.</p>
-
   <label for="newPassword">رمز عبور جدید</label>
   <input id="newPassword" type="password"
     placeholder="حداقل ۸ کاراکتر"
     autocomplete="new-password">
-
   <label for="confirmPassword">تکرار رمز عبور</label>
   <input id="confirmPassword" type="password"
     placeholder="رمز عبور را دوباره وارد کنید"
     autocomplete="new-password">
-
   <button id="savePasswordBtn" class="primary" type="button">
     ثبت رمز جدید
   </button>
-
   <p id="resetMessage" class="message" aria-live="polite"></p>
 `;
 
@@ -59,13 +52,11 @@ const confirmPasswordInput = resetCard.querySelector('#confirmPassword');
 const savePasswordBtn = resetCard.querySelector('#savePasswordBtn');
 const resetMessage = resetCard.querySelector('#resetMessage');
 
-// نمایش پیام
 function showMessage(message, isError = false) {
   loginMessage.textContent = message;
   loginMessage.style.color = isError ? '#dc2626' : '';
 }
 
-// نمایش داشبورد
 function showDashboard(isLoggedIn) {
   loginCard.style.display = isLoggedIn ? 'none' : '';
   dashboard.style.display = isLoggedIn ? '' : 'none';
@@ -73,7 +64,6 @@ function showDashboard(isLoggedIn) {
   forgotBtn.style.display = isLoggedIn ? 'none' : '';
 }
 
-// نمایش فرم بازیابی
 function showRecoveryForm() {
   recoveryMode = true;
   loginCard.style.display = 'none';
@@ -83,14 +73,12 @@ function showRecoveryForm() {
   logoutBtn.style.display = 'none';
 }
 
-// تغییر حالت نمایش
 themeBtn.addEventListener('click', () => {
   document.body.classList.toggle('dark');
   themeBtn.textContent =
     document.body.classList.contains('dark') ? '☀' : '☾';
 });
 
-// خروج از حساب
 logoutBtn.addEventListener('click', async () => {
   if (!supabase) return;
 
@@ -127,16 +115,16 @@ forgotBtn.addEventListener('click', async () => {
   forgotBtn.textContent = 'در حال ارسال ایمیل...';
 
   try {
+    const redirectUrl = window.location.origin + '/';
+
     const { error } = await supabase.auth.resetPasswordForEmail(
       email,
-      {
-        redirectTo: window.location.origin + '/'
-      }
+      { redirectTo: redirectUrl }
     );
 
     if (error) throw error;
 
-    showMessage('درخواست بازیابی ارسال شد. ایمیل خود را بررسی کنید.');
+    showMessage('ایمیل بازیابی ارسال شد. صندوق ورودی و پوشه هرزنامه را بررسی کنید.');
 
   } catch (error) {
     showMessage('ارسال ایمیل ناموفق بود: ' + error.message, true);
@@ -170,6 +158,12 @@ savePasswordBtn.addEventListener('click', async () => {
     return;
   }
 
+  if (!supabase) {
+    resetMessage.textContent = 'اتصال به سرور برقرار نیست.';
+    resetMessage.style.color = '#dc2626';
+    return;
+  }
+
   savePasswordBtn.disabled = true;
   savePasswordBtn.textContent = 'در حال ذخیره...';
 
@@ -195,8 +189,7 @@ savePasswordBtn.addEventListener('click', async () => {
     showMessage('رمز عبور با موفقیت تغییر کرد. اکنون وارد شوید.');
 
   } catch (error) {
-    resetMessage.textContent =
-      'خطا در تغییر رمز: ' + error.message;
+    resetMessage.textContent = 'خطا در تغییر رمز: ' + error.message;
     resetMessage.style.color = '#dc2626';
 
   } finally {
@@ -236,9 +229,20 @@ async function startDenta() {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: true
+        detectSessionInUrl: true,
+        flowType: 'implicit'
       }
     });
+
+    // تشخیص لینک بازیابی قبل از نمایش داشبورد
+    const hash = window.location.hash;
+
+    if (
+      hash.includes('type=recovery') ||
+      hash.includes('access_token=')
+    ) {
+      recoveryMode = true;
+    }
 
     supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
@@ -263,28 +267,26 @@ async function startDenta() {
 
     if (error) throw error;
 
-    if (!recoveryMode) {
-      const isLoggedIn = !!data.session;
-
-      showDashboard(isLoggedIn);
-      logoutBtn.style.display = isLoggedIn ? '' : 'none';
-
-      showMessage(
-        isLoggedIn
-          ? 'به دنتا خوش آمدید.'
-          : 'اتصال امن برقرار شد.'
-      );
+    if (recoveryMode && data.session) {
+      showRecoveryForm();
+      return;
     }
+
+    const isLoggedIn = !!data.session;
+    showDashboard(isLoggedIn);
+    logoutBtn.style.display = isLoggedIn ? '' : 'none';
+
+    showMessage(
+      isLoggedIn
+        ? 'به دنتا خوش آمدید.'
+        : 'اتصال امن برقرار شد.'
+    );
 
   } catch (error) {
     supabase = null;
     showDashboard(false);
     logoutBtn.style.display = 'none';
-
-    showMessage(
-      'خطا در اتصال: ' + error.message,
-      true
-    );
+    showMessage('خطا در اتصال: ' + error.message, true);
   }
 }
 
@@ -308,8 +310,8 @@ loginBtn.addEventListener('click', async () => {
 
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: password
+      email,
+      password
     });
 
     if (error) throw error;
@@ -318,6 +320,7 @@ loginBtn.addEventListener('click', async () => {
       throw new Error('ورود تأیید نشد.');
     }
 
+    recoveryMode = false;
     showDashboard(true);
     logoutBtn.style.display = '';
     showMessage('ورود با موفقیت انجام شد.');
@@ -342,4 +345,4 @@ if ('serviceWorker' in navigator) {
 }
 
 startDenta();
-۹۹
+  
