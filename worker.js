@@ -1,9 +1,21 @@
-
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // بررسی سلامت دنتا
+    // صفحه تعمیرات برای بازدیدکنندگان
+    if (url.pathname === "/") {
+      return env.ASSETS.fetch(
+        new Request(new URL("/maintenance.html", url), request)
+      );
+    }
+
+    // دسترسی به پنل قبلی دنتا
+    if (url.pathname === "/panel" || url.pathname === "/panel/") {
+      return env.ASSETS.fetch(
+        new Request(new URL("/index.html", url), request)
+      );
+    }
+
     if (url.pathname === "/api/health") {
       return Response.json({
         ok: true,
@@ -12,7 +24,6 @@ export default {
       });
     }
 
-    // دریافت تنظیمات عمومی اتصال Supabase
     if (url.pathname === "/api/config") {
       return Response.json({
         supabaseUrl: env.SUPABASE_URL,
@@ -25,7 +36,6 @@ export default {
       });
     }
 
-    // نمایش فایل‌های اصلی سایت
     return env.ASSETS.fetch(request);
   }
 };
