@@ -98,9 +98,9 @@ async function loadClinicContext() {
     throw new Error('این حساب به چند کلینیک متصل است؛ انتخاب کلینیک باید جداگانه تنظیم شود.');
   }
   activeClinicId = memberships[0].clinic_id;
-  const { data: clinic, error: clinicError } = await supabase
+  // نام کلینیک صرفاً نمایشی است؛ نبود مجوز خواندن جدول clinics نباید ورود را متوقف کند.
+  const { data: clinic } = await supabase
     .from('clinics').select('name').eq('id', activeClinicId).maybeSingle();
-  if (clinicError) throw clinicError;
   $('clinicLabel').textContent = clinic?.name || 'کلینیک فعال';
 }
 
@@ -156,11 +156,14 @@ async function loadAppointments() {
   if (error) throw error;
   const list = data || [];
   const today = new Date();
-  const todayCount = list.filter(a => {
-    const d = new Date(a.appointment_at);
-    return d.getFullYear() === today.getFullYear() &&
-      d.getMonth() === today.getMonth() && d.getDate() === today.getDate();
-  }).length;
+  const dayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const dayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+  const { count: todayCount, error: countError } = await supabase
+    .from('appointments').select('id', {count:'exact', head:true})
+    .eq('clinic_id', activeClinicId)
+    .gte('appointment_at', dayStart.toISOString())
+    .lt('appointment_at', dayEnd.toISOString());
+  if (countError) throw countError;
   $('todayCount').textContent = faNumber(todayCount);
   const patientMap = new Map(patientsCache.map(p => [p.id, p]));
   const dentistMap = new Map(dentistsCache.map(d => [d.id, d]));
