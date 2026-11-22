@@ -25,9 +25,12 @@ export default {
     }
 
     if (url.pathname === "/api/config") {
+      const supabaseKey =
+        env.SUPABASE_PUBLISHABLE_KEY || env.SUPABASE_ANON_KEY;
+
       return Response.json({
         supabaseUrl: env.SUPABASE_URL,
-        supabaseKey: env.SUPABASE_PUBLISHABLE_KEY
+        supabaseKey
       }, {
         headers: {
           "Content-Type": "application/json",
