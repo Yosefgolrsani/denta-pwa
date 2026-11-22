@@ -29,23 +29,56 @@
       <label for="password">رمز عبور</label>
       <input id="password" type="password" placeholder="رمز عبور" autocomplete="current-password">
       <button id="loginBtn" class="primary">ورود</button>
-      <p id="loginMessage" class="message" aria-live="polite">اتصال امن به حساب کاربری در مرحله بعد تنظیم می‌شود.</p>
+      <p id="loginMessage" class="message" aria-live="polite">در حال آماده‌سازی اتصال امن...</p>
     </section>
 
-    <section class="dashboard" id="dashboard">
-      <div class="section-title"><h2>نمای کلی</h2><span class="pill">نسخه آزمایشی</span></div>
+    <section class="dashboard" id="dashboard" style="display:none">
+      <div class="section-title"><h2>نمای کلی</h2><span class="pill" id="clinicLabel">کلینیک فعال</span></div>
       <div class="stats">
-        <article class="stat card"><span>نوبت‌های امروز</span><strong>۰</strong><small>در انتظار ثبت اطلاعات</small></article>
-        <article class="stat card"><span>بیماران</span><strong>۰</strong><small>در انتظار اتصال پایگاه داده</small></article>
-        <article class="stat card"><span>دندان‌پزشکان</span><strong>۱</strong><small>قابل تنظیم از پنل</small></article>
+        <article class="stat card"><span>نوبت‌های امروز</span><strong id="todayCount">۰</strong><small>نوبت‌های ثبت‌شده امروز</small></article>
+        <article class="stat card"><span>بیماران</span><strong id="patientCount">۰</strong><small>تعداد بیماران کلینیک</small></article>
+        <article class="stat card"><span>دندان‌پزشکان</span><strong id="dentistCount">۰</strong><small>پروفایل‌های ثبت‌شده</small></article>
       </div>
+
       <div class="section-title"><h2>دسترسی سریع</h2></div>
       <div class="quick">
-        <button class="quick-item" type="button"><span>＋</span>ثبت نوبت</button>
-        <button class="quick-item" type="button"><span>♙</span>بیماران</button>
-        <button class="quick-item" type="button"><span>▦</span>تقویم کاری</button>
-        <button class="quick-item" type="button"><span>⚙</span>تنظیمات</button>
+        <button class="quick-item" id="openAppointment" type="button"><span>＋</span>ثبت نوبت</button>
+        <button class="quick-item" id="openPatients" type="button"><span>♙</span>بیماران</button>
+        <button class="quick-item" id="refreshData" type="button"><span>↻</span>به‌روزرسانی</button>
       </div>
+
+      <section class="workspace card" id="patientsPanel">
+        <div class="section-title"><h2>مدیریت بیماران</h2><span class="pill">ثبت و جستجو</span></div>
+        <form id="patientForm" class="data-form">
+          <label for="patientName">نام و نام خانوادگی بیمار *</label>
+          <input id="patientName" required maxlength="150" placeholder="مثلاً علی رضایی">
+          <label for="patientPhone">شماره تماس</label>
+          <input id="patientPhone" type="tel" inputmode="tel" maxlength="30" placeholder="مثلاً 0912...">
+          <button class="primary" type="submit" id="savePatientBtn">ثبت بیمار</button>
+          <p class="message" id="patientMessage" aria-live="polite"></p>
+        </form>
+        <label for="patientSearch">جستجوی بیمار</label>
+        <input id="patientSearch" type="search" placeholder="نام یا شماره تماس">
+        <div id="patientList" class="record-list"><p class="muted">برای نمایش بیماران، وارد حساب شوید.</p></div>
+      </section>
+
+      <section class="workspace card" id="appointmentsPanel">
+        <div class="section-title"><h2>ثبت نوبت</h2><span class="pill">زمان‌بندی</span></div>
+        <form id="appointmentForm" class="data-form">
+          <label for="appointmentPatient">انتخاب بیمار *</label>
+          <select id="appointmentPatient" required><option value="">ابتدا بیمار را انتخاب کنید</option></select>
+          <label for="appointmentAt">تاریخ و ساعت نوبت *</label>
+          <input id="appointmentAt" type="datetime-local" required>
+          <label for="appointmentDentist">دندان‌پزشک (اختیاری)</label>
+          <select id="appointmentDentist"><option value="">بدون تعیین دندان‌پزشک</option></select>
+          <label for="appointmentNotes">توضیحات</label>
+          <input id="appointmentNotes" maxlength="1000" placeholder="توضیحات اختیاری">
+          <button class="primary" type="submit" id="saveAppointmentBtn">ثبت نوبت</button>
+          <p class="message" id="appointmentMessage" aria-live="polite"></p>
+        </form>
+        <div class="section-title"><h2>نوبت‌های آینده</h2></div>
+        <div id="appointmentList" class="record-list"><p class="muted">هنوز نوبتی بارگذاری نشده است.</p></div>
+      </section>
     </section>
     <footer>دنتا · دستیار مدیریت کلینیک دندان‌پزشکی</footer>
   </main>
