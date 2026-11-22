@@ -1,5 +1,5 @@
 
-const CACHE = 'denta-pwa-v2';
+const CACHE = 'denta-pwa-v3';
 
 const FILES = [
   './',
