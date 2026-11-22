@@ -9,10 +9,17 @@ export default {
       );
     }
 
-    // پنل فعلی دنتا بدون تغییر
+    // پنل مدیران و منشی‌های کلینیک
     if (url.pathname === "/panel" || url.pathname === "/panel/") {
       return env.ASSETS.fetch(
         new Request(new URL("/index.html", url), request)
+      );
+    }
+
+    // پنل مستقل مدیر ارشد دنتا
+    if (url.pathname === "/super-admin" || url.pathname === "/super-admin/") {
+      return env.ASSETS.fetch(
+        new Request(new URL("/super-admin.html", url), request)
       );
     }
 
