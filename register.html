@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ثبت کلینیک | دنتا</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f2f7fc;font-family:Tahoma,Arial,sans-serif;color:#18334c;padding:20px}
+.card{max-width:560px;margin:25px auto;background:white;padding:25px;border-radius:18px;box-shadow:0 8px 35px #1234}
+.logo{text-align:center;color:#1479c9;font-size:30px;font-weight:bold}
+h2{text-align:center;font-size:21px}
+.desc{text-align:center;color:#647b90;font-size:13px;line-height:2}
+label{display:block;margin:15px 0 7px;font-size:13px;font-weight:bold}
+input,textarea{width:100%;padding:13px;border:1px solid #d5e2ed;border-radius:9px;font-size:14px;font-family:inherit}
+textarea{min-height:85px;resize:vertical}
+button{width:100%;border:0;background:#1679c5;color:white;padding:15px;border-radius:10px;font-size:16px;margin-top:22px;cursor:pointer}
+button:disabled{opacity:.6}
+.note{background:#edf6ff;padding:12px;border-radius:9px;font-size:12px;line-height:2;margin-top:18px}
+#message{display:none;padding:13px;border-radius:9px;margin-top:15px;line-height:2;font-size:13px}
+.success{display:block!important;background:#e8f8ef;color:#17683c}
+.error{display:block!important;background:#fff0f0;color:#a32626}
+a{color:#1479c9}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">🦷 DENTA | دنتا</div>
+  <h2>ثبت‌نام کلینیک دندان‌پزشکی</h2>
+  <p class="desc">برای معرفی کلینیک خود در سامانه دنتا، فرم زیر را تکمیل کنید.</p>
+
+  <form id="registerForm">
+    <label>نام کلینیک</label>
+    <input id="clinic" required maxlength="150" placeholder="مثلاً کلینیک دندان‌پزشکی مهر">
+
+    <label>نام و نام خانوادگی مدیر</label>
+    <input id="manager" required placeholder="نام مدیر کلینیک">
+
+    <label>ایمیل مدیر (نام کاربری)</label>
+    <input id="email" type="email" required placeholder="example@email.com">
+
+    <label>رمز عبور (حداقل ۸ کاراکتر)</label>
+    <input id="password" type="password" required minlength="8" autocomplete="new-password">
+
+    <label>شماره تماس</label>
+    <input id="phone" type="tel" required placeholder="شماره تماس کلینیک">
+
+    <label>استان</label>
+    <input id="province" required placeholder="مثلاً تهران">
+
+    <label>شهر</label>
+    <input id="city" required placeholder="مثلاً شهریار">
+
+    <label>نشانی کامل کلینیک</label>
+    <textarea id="address" required placeholder="نشانی کلینیک"></textarea>
+
+    <label>توضیحات (اختیاری)</label>
+    <textarea id="description" placeholder="توضیحات تکمیلی درباره کلینیک"></textarea>
+
+    <button id="submitBtn" type="submit">ایجاد حساب و ثبت درخواست</button>
+  </form>
+
+  <div id="message"></div>
+
+  <div class="note">
+    پس از ثبت‌نام، ایمیل تأیید برای شما ارسال می‌شود.
+    درخواست معرفی کلینیک پس از تأیید ایمیل در انتظار بررسی مدیر ارشد دنتا قرار می‌گیرد.
+    ثبت درخواست به معنی تأیید یا انتشار کلینیک نیست.
+  </div>
+
+  <p style="text-align:center;font-size:13px;margin-top:22px">
+    قبلاً حساب دارید؟
+    <a href="/panel">ورود به پنل دنتا</a>
+  </p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const form = document.getElementById('registerForm');
+const btn = document.getElementById('submitBtn');
+const message = document.getElementById('message');
+
+let supabaseClient = null;
+let busy = false;
+
+function showMessage(text, type) {
+  message.textContent = text;
+  message.className = type;
+}
+
+async function initialize() {
+  try {
+    const response = await fetch('/api/config');
+    if (!response.ok) throw new Error('خطا در دریافت تنظیمات سایت');
+
+    const config = await response.json();
+
+    if (!config.supabaseUrl || !config.supabaseKey) {
+      throw new Error('تنظیمات اتصال دنتا کامل نیست');
+    }
+
+    supabaseClient = window.supabase.createClient(
+      config.supabaseUrl,
+      config.supabaseKey
+    );
+
+    const params = new URLSearchParams(location.search);
+
+    if (params.get('complete') === '1') {
+      await completeRegistration();
+    }
+  } catch (error) {
+    showMessage(error.message, 'error');
+  }
+}
+
+async function completeRegistration() {
+  if (busy) return;
+  busy = true;
+
+  try {
+    const { data, error } = await supabaseClient.auth.getUser();
+    if (error || !data.user) {
+      throw new Error('تأیید ایمیل کامل نشده است. دوباره از لینک ایمیل وارد شوید.');
+    }
+
+    const user = data.user;
+    const info = user.user_metadata || {};
+
+    const { data: existing, error: checkError } =
+      await supabaseClient
+        .from('clinic_registration_requests')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('status', 'pending')
+        .maybeSingle();
+
+    if (checkError) throw checkError;
+
+    if (existing) {
+      showMessage('درخواست شما قبلاً ثبت شده و در انتظار بررسی مدیر دنتاست.', 'success');
+      return;
+    }
+
+    const { error: insertError } = await supabaseClient
+      .from('clinic_registration_requests')
+      .insert({
+        user_id: user.id,
+        clinic_name: info.clinic_name,
+        manager_name: info.manager_name,
+        phone: info.phone,
+        contact_email: user.email,
+        province: info.province,
+        city: info.city,
+        address: info.address,
+        description: info.description || null
+      });
+
+    if (insertError) throw insertError;
+
+    showMessage('درخواست کلینیک شما با موفقیت ثبت شد و در انتظار تأیید مدیر دنتاست.', 'success');
+    form.style.display = 'none';
+
+    history.replaceState({}, '', '/register.html');
+  } catch (error) {
+    showMessage('خطا در ثبت درخواست: ' + error.message, 'error');
+  } finally {
+    busy = false;
+  }
+}
+
+form.addEventListener('submit', async function(event) {
+  event.preventDefault();
+
+  if (!supabaseClient) {
+    showMessage('اتصال به دنتا آماده نیست. صفحه را دوباره بارگذاری کنید.', 'error');
+    return;
+  }
+
+  if (busy) return;
+  busy = true;
+  btn.disabled = true;
+
+  try {
+    const info = {
+      clinic_name: document.getElementById('clinic').value.trim(),
+      manager_name: document.getElementById('manager').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      province: document.getElementById('province').value.trim(),
+      city: document.getElementById('city').value.trim(),
+      address: document.getElementById('address').value.trim(),
+      description: document.getElementById('description').value.trim()
+    };
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    const { data, error } = await supabaseClient.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: location.origin + '/register.html?complete=1',
+        data: info
+      }
+    });
+
+    if (error) throw error;
+
+    if (data.session) {
+      await completeRegistration();
+    } else {
+      form.style.display = 'none';
+      showMessage(
+        'حساب شما ساخته شد. لطفاً ایمیل خود را باز کنید و لینک تأیید دنتا را بزنید. پس از تأیید، درخواست کلینیک ثبت خواهد شد.',
+        'success'
+      );
+    }
+
+  } catch (error) {
+    showMessage('خطا: ' + error.message, 'error');
+  } finally {
+    busy = false;
+    btn.disabled = false;
+  }
+});
+
+initialize();
+</script>
+</body>
+</html>
