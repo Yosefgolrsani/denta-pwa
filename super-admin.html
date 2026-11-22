@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0879c9">
+<title>پنل مدیر ارشد | دنتا</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f8fc;color:#18344b;font-family:Tahoma,Arial,sans-serif;line-height:1.9}
+header{background:#fff;border-bottom:1px solid #e2ebf3;padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-size:22px;font-weight:bold;color:#0879c9}.brand span{color:#18a9a0}
+main{max-width:1050px;margin:28px auto;padding:0 15px}
+.card{background:#fff;border:1px solid #e1eaf2;border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 5px 20px #173b5708}
+h1,h2,h3{margin-top:0}h1{font-size:23px}h2{font-size:19px}
+.muted{color:#6d8191;font-size:13px}
+label{display:block;font-size:13px;font-weight:bold;margin:12px 0 5px}
+input,textarea,select{width:100%;padding:12px;border:1px solid #d5e2ec;border-radius:10px;font:14px Tahoma,Arial,sans-serif;background:#fff;color:#18344b}
+textarea{min-height:75px;resize:vertical}
+button,.button{border:0;border-radius:10px;padding:11px 16px;font: bold 13px Tahoma,Arial,sans-serif;cursor:pointer;text-decoration:none;display:inline-block}
+button:disabled{opacity:.55;cursor:wait}
+.primary{background:#0879c9;color:#fff}.soft{background:#eaf5fd;color:#0879c9}.danger{background:#fff0f0;color:#b42318}.logout{background:#eef2f6;color:#405466}
+#loginBox{max-width:460px;margin:45px auto}
+#app{display:none}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.message{padding:11px;border-radius:10px;background:#edf6ff;color:#235578;font-size:13px;margin-top:12px;white-space:pre-wrap}
+.error{background:#fff0f0;color:#a32626}
+.success{background:#eaf8ef;color:#17683c}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.stat{padding:15px;background:#f7fbfe;border:1px solid #e6eef5;border-radius:12px}
+.stat strong{display:block;font-size:23px;color:#0879c9}
+.request{border:1px solid #e2ebf3;border-radius:14px;padding:16px;margin:12px 0;background:#fff}
+.request h3{font-size:17px;color:#0879c9;margin:0 0 8px}
+.meta{font-size:13px;color:#526b7d;overflow-wrap:anywhere}
+.meta p{margin:4px 0}
+.status{display:inline-block;border-radius:20px;padding:3px 10px;font-size:12px;background:#eef2f6;color:#526273}
+.status.pending{background:#fff6df;color:#875b00}.status.approved{background:#e7f7ed;color:#17683c}.status.rejected{background:#fff0f0;color:#a32626}
+.request-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.hidden{display:none!important}
+@media(max-width:600px){main{margin:18px auto}.stats{grid-template-columns:1fr}.card{padding:15px}.topline{align-items:flex-start}}
+</style>
+</head>
+<body>
+<header><div class="brand">DENTA <span>| مدیر ارشد</span></div><a class="button soft" href="/">صفحه اصلی</a></header>
+<main>
+<section id="loginBox" class="card">
+<h1>ورود مدیر ارشد دنتا</h1>
+<p class="muted">این بخش فقط برای حساب دارای نقش مدیر ارشد فعال است.</p>
+<div id="loginFields">
+<label for="email">ایمیل مدیر ارشد</label><input id="email" type="email" autocomplete="username" placeholder="ایمیل حساب دنتا">
+<label for="password">رمز عبور</label><input id="password" type="password" autocomplete="current-password" placeholder="رمز عبور">
+<div class="actions" style="margin-top:15px"><button id="loginBtn" class="primary">ورود امن</button><button id="forgotBtn" class="soft" type="button">فراموشی رمز</button></div>
+</div>
+<div id="recoveryFields" class="hidden">
+<label for="newPassword">رمز عبور جدید</label><input id="newPassword" type="password" autocomplete="new-password">
+<label for="confirmPassword">تکرار رمز عبور</label><input id="confirmPassword" type="password" autocomplete="new-password">
+<button id="savePasswordBtn" class="primary" style="margin-top:14px">ذخیره رمز جدید</button>
+</div>
+<div id="loginMessage" class="message" aria-live="polite">در حال آماده‌سازی اتصال امن...</div>
+</section>
+
+<section id="app">
+<div class="card">
+<div class="topline"><div><h1>مدیریت درخواست‌های کلینیک</h1><p id="adminName" class="muted">مدیر ارشد دنتا</p></div><div class="actions"><button id="refreshBtn" class="soft">بروزرسانی</button><button id="logoutBtn" class="logout">خروج</button></div></div>
+<div class="stats">
+<div class="stat"><span class="muted">همه درخواست‌ها</span><strong id="allCount">۰</strong></div>
+<div class="stat"><span class="muted">در انتظار بررسی</span><strong id="pendingCount">۰</strong></div>
+<div class="stat"><span class="muted">بررسی‌شده</span><strong id="reviewedCount">۰</strong></div>
+</div>
+<div id="appMessage" class="message hidden" aria-live="polite"></div>
+</div>
+<div class="card">
+<div class="topline"><h2>فهرست درخواست‌ها</h2><select id="filter" style="max-width:190px"><option value="all">همه وضعیت‌ها</option><option value="pending">در انتظار بررسی</option><option value="approved">تأییدشده</option><option value="rejected">ردشده</option></select></div>
+<div id="requests"><p class="muted">در حال دریافت درخواست‌ها...</p></div>
+</div>
+</section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+let client=null, requests=[];
+const $=id=>document.getElementById(id);
+function message(el,text,type){el.textContent=text;el.className='message'+(type?' '+type:'');el.classList.remove('hidden')}
+function showLogin(text,type){$('loginBox').style.display='';$('app').style.display='none';if(text)message($('loginMessage'),text,type)}
+function faDate(value){try{return new Intl.DateTimeFormat('fa-IR',{dateStyle:'medium',timeStyle:'short'}).format(new Date(value))}catch{return value||'—'}}
+function addLine(parent,label,value){if(value===null||value===undefined||value==='')return;const p=document.createElement('p');p.textContent=label+' : '+value;parent.appendChild(p)}
+async function loadRequests(){
+  message($('appMessage'),'در حال دریافت درخواست‌ها...');
+  const {data,error}=await client.rpc('denta_super_admin_list_requests');
+  if(error){message($('appMessage'),'خطا در دریافت درخواست‌ها: '+error.message,'error');return}
+  requests=Array.isArray(data)?data:[];
+  $('allCount').textContent=String(requests.length);
+  $('pendingCount').textContent=String(requests.filter(x=>x.status==='pending').length);
+  $('reviewedCount').textContent=String(requests.filter(x=>x.status==='approved'||x.status==='rejected').length);
+  renderRequests();
+  $('appMessage').classList.add('hidden');
+}
+function renderRequests(){
+  const root=$('requests');root.replaceChildren();
+  const filter=$('filter').value;
+  const rows=requests.filter(x=>filter==='all'||x.status===filter);
+  if(!rows.length){const p=document.createElement('p');p.className='muted';p.textContent='درخواستی برای نمایش وجود ندارد.';root.appendChild(p);return}
+  rows.forEach(r=>{
+    const card=document.createElement('article');card.className='request';
+    const title=document.createElement('h3');title.textContent=r.clinic_name||'کلینیک بدون نام';card.appendChild(title);
+    const status=document.createElement('span');status.className='status '+(r.status||'');status.textContent=r.status==='pending'?'در انتظار بررسی':r.status==='approved'?'تأییدشده':r.status==='rejected'?'ردشده':(r.status||'نامشخص');card.appendChild(status);
+    const meta=document.createElement('div');meta.className='meta';
+    addLine(meta,'مدیر',r.manager_name);addLine(meta,'تلفن',r.phone);addLine(meta,'ایمیل',r.contact_email);addLine(meta,'استان',r.province);addLine(meta,'شهر',r.city);addLine(meta,'نشانی',r.address);addLine(meta,'توضیحات',r.description);addLine(meta,'تاریخ ثبت',faDate(r.created_at));addLine(meta,'یادداشت بررسی',r.review_note);
+    card.appendChild(meta);
+    if(r.status==='pending'){
+      const note=document.createElement('textarea');note.placeholder='یادداشت مدیر ارشد (اختیاری)';note.maxLength=1000;note.style.marginTop='10px';card.appendChild(note);
+      const actions=document.createElement('div');actions.className='request-actions';
+      const approve=document.createElement('button');approve.className='primary';approve.textContent='تأیید کلینیک';
+      approve.addEventListener('click',()=>review(r.id,'approved',note.value,approve));
+      const reject=document.createElement('button');reject.className='danger';reject.textContent='رد درخواست';
+      reject.addEventListener('click',()=>review(r.id,'rejected',note.value,reject));
+      actions.append(approve,reject);card.appendChild(actions);
+    }
+    root.appendChild(card);
+  });
+}
+async function review(id,decision,note,button){
+  const label=decision==='approved'?'تأیید':'رد';
+  if(!confirm('آیا از '+label+' این درخواست مطمئن هستید؟'))return;
+  button.disabled=true;
+  const {data,error}=await client.rpc('review_clinic_request',{request_id:id,decision,admin_note:note||null});
+  button.disabled=false;
+  if(error){message($('appMessage'),'عملیات انجام نشد: '+error.message,'error');return}
+  message($('appMessage'),decision==='approved'?'کلینیک تأیید شد و مدیر آن به‌صورت خودکار عضو کلینیک شد.':'درخواست با موفقیت رد شد.','success');
+  await loadRequests();
+}
+async function checkAdmin(session){
+  if(!session){showLogin('برای ورود، ایمیل و رمز عبور مدیر ارشد را وارد کن.');return}
+  const {data,error}=await client.from('admins').select('full_name,role').eq('id',session.user.id).maybeSingle();
+  if(error){showLogin('بررسی دسترسی انجام نشد: '+error.message,'error');return}
+  if(!data||data.role!=='super_admin'){await client.auth.signOut();showLogin('این حساب دسترسی مدیر ارشد دنتا ندارد.','error');return}
+  $('loginBox').style.display='none';$('app').style.display='block';$('adminName').textContent='خوش آمدید، '+(data.full_name||'مدیر ارشد');
+  await loadRequests();
+}
+async function start(){
+ try{
+  const response=await fetch('/api/config',{cache:'no-store'});if(!response.ok)throw new Error('تنظیمات اتصال دریافت نشد');
+  const config=await response.json();if(!config.supabaseUrl||!config.supabaseKey)throw new Error('تنظیمات Supabase ناقص است');
+  client=window.supabase.createClient(config.supabaseUrl,config.supabaseKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  const {data,error}=await client.auth.getSession();if(error)throw error;
+  if(location.hash.includes('type=recovery')){$('loginFields').classList.add('hidden');$('recoveryFields').classList.remove('hidden');message($('loginMessage'),'رمز عبور جدید را تعیین کن.');return}
+  await checkAdmin(data.session);
+  client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT')showLogin('از حساب خارج شدی.');if(event==='SIGNED_IN')setTimeout(()=>checkAdmin(session),0);if(event==='PASSWORD_RECOVERY'){$('loginFields').classList.add('hidden');$('recoveryFields').classList.remove('hidden');message($('loginMessage'),'رمز عبور جدید را تعیین کن.')}});
+ }catch(e){showLogin('خطا در اتصال: '+e.message,'error')}
+}
+$('loginBtn').addEventListener('click',async()=>{
+ const email=$('email').value.trim(),password=$('password').value;
+ if(!email||!password){message($('loginMessage'),'ایمیل و رمز عبور را وارد کن.','error');return}
+ $('loginBtn').disabled=true;
+ const {data,error}=await client.auth.signInWithPassword({email,password});
+ $('loginBtn').disabled=false;
+ if(error){message($('loginMessage'),'ورود ناموفق بود: '+error.message,'error');return}
+ await checkAdmin(data.session);
+});
+$('forgotBtn').addEventListener('click',async()=>{
+ const email=$('email').value.trim();if(!email){message($('loginMessage'),'ابتدا ایمیل مدیر ارشد را وارد کن.','error');return}
+ const {error}=await client.auth.resetPasswordForEmail(email,{redirectTo:location.origin+'/super-admin'});
+ if(error)message($('loginMessage'),'ارسال ایمیل بازیابی ناموفق بود: '+error.message,'error');else message($('loginMessage'),'اگر حسابی با این ایمیل وجود داشته باشد، لینک بازیابی ارسال می‌شود. صندوق ورودی و هرزنامه را بررسی کن.','success');
+});
+$('savePasswordBtn').addEventListener('click',async()=>{
+ const a=$('newPassword').value,b=$('confirmPassword').value;
+ if(a.length<8||a!==b){message($('loginMessage'),'رمز باید حداقل ۸ نویسه باشد و دو کادر یکسان باشند.','error');return}
+ const {error}=await client.auth.updateUser({password:a});
+ if(error){message($('loginMessage'),'تغییر رمز ناموفق بود: '+error.message,'error');return}
+ await client.auth.signOut();$('recoveryFields').classList.add('hidden');$('loginFields').classList.remove('hidden');message($('loginMessage'),'رمز تغییر کرد. اکنون وارد شو.','success');
+});
+$('logoutBtn').addEventListener('click',()=>client.auth.signOut());
+$('refreshBtn').addEventListener('click',loadRequests);
+$('filter').addEventListener('change',renderRequests);
+start();
+</script>
+</body>
+</html>
