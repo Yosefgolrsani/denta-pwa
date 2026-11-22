@@ -16,11 +16,9 @@ export default {
       );
     }
 
-    // پنل مستقل مدیر ارشد دنتا
+    // پنل مدیر ارشد؛ Cloudflare خودش /super-admin را به super-admin.html وصل می‌کند
     if (url.pathname === "/super-admin" || url.pathname === "/super-admin/") {
-      return env.ASSETS.fetch(
-        new Request(new URL("/super-admin.html", url), request)
-      );
+      return env.ASSETS.fetch(request);
     }
 
     if (url.pathname === "/api/health") {
