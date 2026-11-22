@@ -2,14 +2,14 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // صفحه تعمیرات برای بازدیدکنندگان
-    if (url.pathname === "/") {
+    // صفحه اصلی عمومی دنتا
+    if (url.pathname === "/" || url.pathname === "") {
       return env.ASSETS.fetch(
-        new Request(new URL("/maintenance.html", url), request)
+        new Request(new URL("/home.html", url), request)
       );
     }
 
-    // دسترسی به پنل قبلی دنتا
+    // پنل فعلی دنتا بدون تغییر
     if (url.pathname === "/panel" || url.pathname === "/panel/") {
       return env.ASSETS.fetch(
         new Request(new URL("/index.html", url), request)
