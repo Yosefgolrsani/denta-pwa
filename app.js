@@ -19,7 +19,7 @@ const appointmentForm = $('appointmentForm');
 const logoutBtn = document.createElement('button');
 logoutBtn.type = 'button';
 logoutBtn.textContent = 'خروج از حساب';
-logoutBtn.className = 'icon-btn';
+logoutBtn.className = 'icon-btn logout-btn';
 logoutBtn.style.display = 'none';
 document.querySelector('.topbar').appendChild(logoutBtn);
 
