@@ -54,7 +54,7 @@ $$;
 
 drop trigger if exists denta_articles_updated_at on public.denta_articles;
 create trigger denta_articles_updated_at
-before update on public.denta_articles
+before insert or update on public.denta_articles
 for each row execute function public.denta_articles_set_updated_at();
 
 -- Public bucket for approved dentist profile photos.
