@@ -60,6 +60,8 @@ section.content{max-width:1180px;margin:76px auto;padding:0 22px}
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 .feature{background:#fff;border:1px solid var(--line);border-radius:19px;padding:26px 23px;transition:.22s}
 .feature:hover{transform:translateY(-4px);box-shadow:0 16px 34px #193a3010}
+.feature-link{display:block;color:inherit;cursor:pointer}
+.feature-link:focus-visible{outline:3px solid var(--gold);outline-offset:4px}
 .feature-icon{width:48px;height:48px;border-radius:15px;background:#edf3ed;color:var(--green);display:grid;place-items:center;font-size:23px}
 .feature h3{font-size:15px;margin:17px 0 7px}
 .feature p{font-size:12px;color:var(--muted);margin:0}
@@ -122,9 +124,9 @@ footer a{color:#e4d2aa;margin:0 10px}
  <section class="content" id="features">
   <div class="section-head"><span class="kicker">WHY DENTA</span><h2>دنتا چه کمکی به شما می‌کند؟</h2><p>اطلاعات را شفاف‌تر ببینید و مسیر انتخاب کلینیک را ساده‌تر طی کنید.</p></div>
   <div class="cards">
-   <article class="feature"><div class="feature-icon">⌕</div><h3>جستجوی ساده و سریع</h3><p>کلینیک‌های تأییدشده را بر اساس نام و موقعیت جستجو کنید.</p></article>
-   <article class="feature"><div class="feature-icon">✧</div><h3>آشنایی با کلینیک‌ها</h3><p>اطلاعات و راه‌های تماس کلینیک‌ها را در یک صفحه مشاهده کنید.</p></article>
-   <article class="feature"><div class="feature-icon">✓</div><h3>نمایش پس از بررسی</h3><p>درخواست ثبت کلینیک پس از بررسی و تأیید مدیریت دنتا منتشر می‌شود.</p></article>
+   <a class="feature feature-link" href="#clinic-search" id="featureSearch"><div class="feature-icon">⌕</div><h3>جستجوی ساده و سریع</h3><p>برای جستجوی کلینیک‌های تأییدشده، اینجا را لمس کنید.</p></a>
+   <a class="feature feature-link" href="#clinic-search" id="featureAllClinics"><div class="feature-icon">✧</div><h3>آشنایی با کلینیک‌ها</h3><p>برای دیدن فهرست کلینیک‌های تأییدشده، اینجا را لمس کنید.</p></a>
+   <a class="feature feature-link" href="#how"><div class="feature-icon">✓</div><h3>نمایش پس از بررسی</h3><p>مراحل ثبت، بررسی و تأیید کلینیک را مشاهده کنید.</p></a>
   </div>
  </section>
  <section class="content" id="how">
@@ -241,16 +243,18 @@ async function searchClinics(q, location){
  }
 }
 
+document.getElementById('featureSearch').addEventListener('click',function(){
+ setTimeout(()=>document.getElementById('q').focus(),250);
+});
+
+document.getElementById('featureAllClinics').addEventListener('click',function(){
+ searchClinics('','');
+});
+
 document.getElementById('searchForm').addEventListener('submit',function(event){
  event.preventDefault();
  const q = document.getElementById('q').value.trim();
  const location = document.getElementById('city').value.trim();
-
- if(!q && !location){
-  document.getElementById('searchHint').textContent = 'نام کلینیک یا استان و شهر را وارد کنید.';
-  document.getElementById('searchResults').replaceChildren();
-  return;
- }
 
  searchClinics(q,location);
 });
