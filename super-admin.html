@@ -74,6 +74,24 @@ button:disabled{opacity:.55;cursor:wait}
 <div class="topline"><h2>فهرست درخواست‌ها</h2><select id="filter" style="max-width:190px"><option value="all">همه وضعیت‌ها</option><option value="pending">در انتظار بررسی</option><option value="approved">تأییدشده</option><option value="rejected">ردشده</option></select></div>
 <div id="requests"><p class="muted">در حال دریافت درخواست‌ها...</p></div>
 </div>
+<div class="card" id="articlesAdmin">
+<h2>مدیریت مقاله‌های مجله دنتا</h2>
+<p class="muted">مقاله‌ها را بنویسید، برای گوگل عنوان و توضیح تعیین کنید و پس از بررسی منتشر کنید.</p>
+<form id="articleForm">
+<input type="hidden" id="articleId">
+<label for="articleTitle">عنوان مقاله</label><input id="articleTitle" required maxlength="180">
+<label for="articleSlug">نشانی انگلیسی مقاله (Slug)</label><input id="articleSlug" required pattern="[a-z0-9-]+" placeholder="dental-care-guide">
+<label for="articleExcerpt">خلاصه مقاله</label><textarea id="articleExcerpt" maxlength="350"></textarea>
+<label for="articleContent">متن مقاله</label><textarea id="articleContent" required style="min-height:220px"></textarea>
+<label for="articleCover">نشانی تصویر اصلی (اختیاری)</label><input id="articleCover" type="url" placeholder="https://...">
+<label for="articleSeoTitle">عنوان سئو</label><input id="articleSeoTitle" maxlength="180">
+<label for="articleSeoDescription">توضیحات سئو</label><textarea id="articleSeoDescription" maxlength="300"></textarea>
+<label for="articleStatus">وضعیت انتشار</label><select id="articleStatus"><option value="draft">پیش‌نویس</option><option value="published">منتشر شود</option></select>
+<div class="actions" style="margin-top:14px"><button class="primary" type="submit" id="saveArticleBtn">ذخیره مقاله</button><button class="soft" type="button" id="cancelArticleEdit">پاک کردن فرم</button></div>
+</form>
+<div id="articleMessage" class="message hidden" aria-live="polite"></div>
+<div id="articleList"><p class="muted">در حال بارگذاری مقاله‌ها...</p></div>
+</div>
 </section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -128,7 +146,47 @@ async function review(id,decision,note,button){
   if(error){message($('appMessage'),'عملیات انجام نشد: '+error.message,'error');return}
   message($('appMessage'),decision==='approved'?'کلینیک تأیید شد و مدیر آن به‌صورت خودکار عضو کلینیک شد.':'درخواست با موفقیت رد شد.','success');
   await loadRequests();
+  await loadArticles();
 }
+let articles=[];
+function articleMsg(text,type){message($('articleMessage'),text,type)}
+function resetArticleForm(){
+ $('articleForm').reset();$('articleId').value='';$('saveArticleBtn').textContent='ذخیره مقاله';
+}
+function renderArticles(){
+ const root=$('articleList');root.replaceChildren();
+ if(!articles.length){const p=document.createElement('p');p.className='muted';p.textContent='هنوز مقاله‌ای ثبت نشده است.';root.appendChild(p);return}
+ articles.forEach(a=>{
+  const card=document.createElement('article');card.className='request';
+  const h=document.createElement('h3');h.textContent=a.title;card.appendChild(h);
+  const meta=document.createElement('div');meta.className='meta';
+  addLine(meta,'نشانی','/magazine?slug='+a.slug);addLine(meta,'وضعیت',a.status==='published'?'منتشرشده':'پیش‌نویس');card.appendChild(meta);
+  const actions=document.createElement('div');actions.className='request-actions';
+  const edit=document.createElement('button');edit.className='soft';edit.textContent='ویرایش';
+  edit.addEventListener('click',()=>{ $('articleId').value=a.id;$('articleTitle').value=a.title;$('articleSlug').value=a.slug;$('articleExcerpt').value=a.excerpt||'';$('articleContent').value=a.content;$('articleCover').value=a.cover_image_url||'';$('articleSeoTitle').value=a.seo_title||'';$('articleSeoDescription').value=a.seo_description||'';$('articleStatus').value=a.status;$('saveArticleBtn').textContent='ذخیره تغییرات';$('articlesAdmin').scrollIntoView({behavior:'smooth'});});
+  const del=document.createElement('button');del.className='danger';del.textContent='حذف';
+  del.addEventListener('click',async()=>{if(!confirm('این مقاله حذف شود؟'))return;const {error}=await client.from('denta_articles').delete().eq('id',a.id);if(error){articleMsg('حذف مقاله ناموفق بود: '+error.message,'error');return}await loadArticles();});
+  actions.append(edit,del);card.appendChild(actions);root.appendChild(card);
+ });
+}
+async function loadArticles(){
+ const {data,error}=await client.from('denta_articles').select('*').order('updated_at',{ascending:false});
+ if(error){$('articleList').textContent='جدول مقاله‌ها آماده نیست. ابتدا فایل SQL راه‌اندازی محتوای دنتا را در Supabase اجرا کنید. جزئیات: '+error.message;return}
+ articles=data||[];renderArticles();
+}
+$('articleForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const slug=$('articleSlug').value.trim().toLowerCase();
+ if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)){articleMsg('نشانی مقاله فقط باید شامل حروف انگلیسی کوچک، عدد و خط تیره باشد.','error');return}
+ const payload={title:$('articleTitle').value.trim(),slug,excerpt:$('articleExcerpt').value.trim()||null,content:$('articleContent').value.trim(),cover_image_url:$('articleCover').value.trim()||null,seo_title:$('articleSeoTitle').value.trim()||null,seo_description:$('articleSeoDescription').value.trim()||null,status:$('articleStatus').value};
+ const id=$('articleId').value;if(id)payload.id=id;else payload.author_id=(await client.auth.getUser()).data.user.id;
+ $('saveArticleBtn').disabled=true;
+ const {error}=await client.from('denta_articles').upsert(payload);
+ $('saveArticleBtn').disabled=false;
+ if(error){articleMsg('ذخیره مقاله انجام نشد: '+error.message,'error');return}
+ articleMsg('مقاله ذخیره شد.','success');resetArticleForm();await loadArticles();
+});
+$('cancelArticleEdit').addEventListener('click',resetArticleForm);
 async function checkAdmin(session){
   if(!session){showLogin('برای ورود، ایمیل و رمز عبور مدیر ارشد را وارد کن.');return}
   const {data,error}=await client.from('admins').select('full_name,role').eq('id',session.user.id).maybeSingle();
