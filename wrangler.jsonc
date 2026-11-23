@@ -1,4 +1,3 @@
-
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "denta-pwa",
@@ -12,5 +11,11 @@
   "vars": {
     "SUPABASE_URL": "https://kkgwywkncuqifgrzvgbn.supabase.co",
     "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_45nGYacEmBp1Ofc1lKmoGg_v-Rcjj28"
+  },
+  "previews": {
+    "vars": {
+      "SUPABASE_URL": "https://kkgwywkncuqifgrzvgbn.supabase.co",
+      "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_45nGYacEmBp1Ofc1lKmoGg_v-Rcjj28"
+    }
   }
 }
