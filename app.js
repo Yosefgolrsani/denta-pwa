@@ -323,18 +323,28 @@ async function loadRevenueReport() {
     $('revenueTotal').textContent = faNumber(totalAmount) + ' تومان';
     $('revenueCount').textContent = faNumber(paymentCount);
     const monthlyMap = new Map();
+    const persianMonthKeyFormatter = new Intl.DateTimeFormat('en-u-ca-persian', {
+      timeZone: 'Asia/Tehran', year: 'numeric', month: 'numeric'
+    });
+    const persianMonthLabelFormatter = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+      timeZone: 'Asia/Tehran', year: 'numeric', month: 'long'
+    });
     daily.forEach(day => {
-      const monthKey = String(day.day).slice(0, 7);
-      const current = monthlyMap.get(monthKey) || { total_amount: 0, payment_count: 0 };
+      const dayDate = new Date(String(day.day) + 'T12:00:00+03:30');
+      const parts = Object.fromEntries(persianMonthKeyFormatter.formatToParts(dayDate)
+        .map(part => [part.type, part.value]));
+      const monthKey = String(parts.year) + '-' + String(parts.month).padStart(2, '0');
+      const current = monthlyMap.get(monthKey) || {
+        label: persianMonthLabelFormatter.format(dayDate),
+        total_amount: 0, payment_count: 0
+      };
       current.total_amount += Number(day.total_amount || 0);
       current.payment_count += Number(day.payment_count || 0);
       monthlyMap.set(monthKey, current);
     });
     const monthly = [...monthlyMap.entries()].sort((a, b) => a[0].localeCompare(b[0]));
     $('revenueMonthlyList').innerHTML = monthly.length ? monthly.map(([month, values]) => {
-      const monthLabel = new Intl.DateTimeFormat('fa-IR', {year:'numeric', month:'long'})
-        .format(new Date(month + '-15T12:00:00+03:30'));
-      return `<article class="record"><div><strong>${escapeHtml(monthLabel)}</strong><small>${faNumber(values.payment_count)} پرداخت</small></div><strong>${faNumber(values.total_amount)} تومان</strong></article>`;
+      return `<article class="record"><div><strong>${escapeHtml(values.label)}</strong><small>${faNumber(values.payment_count)} پرداخت</small></div><strong>${faNumber(values.total_amount)} تومان</strong></article>`;
     }).join('') : '<p class="muted">در این بازه پرداختی ثبت نشده است.</p>';
     $('revenueDailyList').innerHTML = daily.length ? daily.map(day => {
       const dateLabel = new Intl.DateTimeFormat('fa-IR', {dateStyle:'medium'})
@@ -363,16 +373,25 @@ $('exportRevenueExcel')?.addEventListener('click', () => {
   ];
   revenueReportCache.daily.forEach(day => rows.push(['روزانه', day.day, day.payment_count, day.total_amount]));
   const months = new Map();
+  const csvMonthKeyFormatter = new Intl.DateTimeFormat('en-u-ca-persian', {
+    timeZone: 'Asia/Tehran', year: 'numeric', month: 'numeric'
+  });
+  const csvMonthLabelFormatter = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+    timeZone: 'Asia/Tehran', year: 'numeric', month: 'long'
+  });
   revenueReportCache.daily.forEach(day => {
-    const key = String(day.day).slice(0, 7);
-    const value = months.get(key) || { count: 0, amount: 0 };
+    const dayDate = new Date(String(day.day) + 'T12:00:00+03:30');
+    const parts = Object.fromEntries(csvMonthKeyFormatter.formatToParts(dayDate)
+      .map(part => [part.type, part.value]));
+    const key = String(parts.year) + '-' + String(parts.month).padStart(2, '0');
+    const value = months.get(key) || { label: csvMonthLabelFormatter.format(dayDate), count: 0, amount: 0 };
     value.count += Number(day.payment_count || 0);
     value.amount += Number(day.total_amount || 0);
     months.set(key, value);
   });
   rows.push(['گزارش ماهانه', '', '', '']);
   [...months.entries()].sort((a,b) => a[0].localeCompare(b[0]))
-    .forEach(([month, value]) => rows.push(['ماهانه', month, value.count, value.amount]));
+    .forEach(([month, value]) => rows.push(['ماهانه', value.label, value.count, value.amount]));
   const csv = '\uFEFF' + rows.map(row => row.map(value =>
     '"' + String(value ?? '').replace(/"/g, '""') + '"'
   ).join(',')).join('\r\n');
