@@ -54,6 +54,28 @@
         <p id="financePermissionMessage" class="message" aria-live="polite"></p>
       </section>
 
+
+      <section class="workspace card" id="paymentsPanel" style="display:none">
+        <div class="section-title"><h2>مدیریت پرداخت‌ها</h2><span class="pill">دسترسی مالی</span></div>
+        <p class="muted">ثبت و ویرایش پرداخت‌های بیماران. حذف پرداخت از این بخش امکان‌پذیر نیست.</p>
+        <form id="paymentForm" class="data-form">
+          <input id="paymentId" type="hidden">
+          <label for="paymentPatient">بیمار *</label>
+          <select id="paymentPatient" required><option value="">انتخاب بیمار</option></select>
+          <label for="paymentAmount">مبلغ پرداخت (تومان) *</label>
+          <input id="paymentAmount" type="number" min="1" step="1" required placeholder="مثلاً 500000">
+          <label for="paymentDate">تاریخ و ساعت پرداخت</label>
+          <input id="paymentDate" type="datetime-local">
+          <label for="paymentDescription">توضیحات</label>
+          <input id="paymentDescription" maxlength="1000" placeholder="توضیحات اختیاری">
+          <button class="primary" type="submit" id="savePaymentBtn">ثبت پرداخت</button>
+          <button class="small-action" type="button" id="cancelPaymentEdit" style="display:none">لغو ویرایش</button>
+          <p class="message" id="paymentMessage" aria-live="polite"></p>
+        </form>
+        <div class="section-title"><h2>سوابق پرداخت</h2></div>
+        <div id="paymentList" class="record-list"><p class="muted">در حال بارگذاری...</p></div>
+      </section>
+
       <section class="workspace card" id="patientsPanel">
         <div class="section-title"><h2>مدیریت بیماران</h2><span class="pill">ثبت و جستجو</span></div>
         <form id="patientForm" class="data-form">
