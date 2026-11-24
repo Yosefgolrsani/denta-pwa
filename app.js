@@ -275,6 +275,61 @@ async function loadPayments() {
     </article>`).join('') : '<p class="muted">هنوز پرداختی ثبت نشده است.</p>';
   window.dentaPaymentsCache = data || [];
 }
+
+function localDateInputValue(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+async function loadRevenueReport() {
+  const panel = $('revenueReportPanel');
+  if (!panel || !activeClinicId) return;
+  panel.style.display = 'none';
+  const { data: allowed, error: accessError } = await supabase.rpc('denta_secretary_has_finance_access', {
+    target_clinic: activeClinicId
+  });
+  if (accessError || allowed !== true) return;
+  panel.style.display = '';
+  if (!$('revenueFrom').value || !$('revenueTo').value) {
+    const today = new Date();
+    $('revenueFrom').value = localDateInputValue(new Date(today.getFullYear(), today.getMonth(), 1));
+    $('revenueTo').value = localDateInputValue(today);
+  }
+  const fromDate = $('revenueFrom').value;
+  const toDate = $('revenueTo').value;
+  if (fromDate > toDate) {
+    setFormMessage('revenueMessage', 'تاریخ شروع نباید بعد از تاریخ پایان باشد.', true);
+    return;
+  }
+  $('loadRevenueReport').disabled = true;
+  setFormMessage('revenueMessage', 'در حال دریافت گزارش...');
+  try {
+    const { data, error } = await supabase.rpc('denta_clinic_revenue_report', {
+      target_clinic: activeClinicId,
+      p_from_date: fromDate,
+      p_to_date: toDate
+    });
+    if (error) throw error;
+    const report = data || {};
+    $('revenueTotal').textContent = faNumber(report.total_amount) + ' تومان';
+    $('revenueCount').textContent = faNumber(report.payment_count);
+    const daily = Array.isArray(report.daily) ? report.daily : [];
+    $('revenueDailyList').innerHTML = daily.length ? daily.map(day => {
+      const dateLabel = new Intl.DateTimeFormat('fa-IR', {dateStyle:'medium'})
+        .format(new Date(day.day + 'T12:00:00+03:30'));
+      return `<article class="record"><div><strong>${escapeHtml(dateLabel)}</strong><small>${faNumber(day.payment_count)} پرداخت</small></div><strong>${faNumber(day.total_amount)} تومان</strong></article>`;
+    }).join('') : '<p class="muted">در این بازه پرداختی ثبت نشده است.</p>';
+    setFormMessage('revenueMessage', 'گزارش با موفقیت به‌روزرسانی شد.');
+  } catch (error) {
+    $('revenueDailyList').innerHTML = '<p class="muted">دریافت گزارش ناموفق بود.</p>';
+    setFormMessage('revenueMessage', 'خطا در دریافت گزارش: ' + error.message, true);
+  } finally {
+    $('loadRevenueReport').disabled = false;
+  }
+}
+$('loadRevenueReport')?.addEventListener('click', loadRevenueReport);
+
 function resetPaymentForm() {
   $('paymentForm').reset();
   $('paymentId').value = '';
@@ -311,6 +366,7 @@ $('paymentForm')?.addEventListener('submit', async (event) => {
     setFormMessage('paymentMessage', id ? 'پرداخت ویرایش شد.' : 'پرداخت با موفقیت ثبت شد.');
     resetPaymentForm();
     await loadPayments();
+    await loadRevenueReport();
   } catch (error) {
     setFormMessage('paymentMessage','ثبت یا ویرایش پرداخت ناموفق بود: '+error.message,true);
   } finally {
