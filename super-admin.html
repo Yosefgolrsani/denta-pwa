@@ -92,6 +92,18 @@ button:disabled{opacity:.55;cursor:wait}
 <div id="articleMessage" class="message hidden" aria-live="polite"></div>
 <div id="articleList"><p class="muted">در حال بارگذاری مقاله‌ها...</p></div>
 </div>
+
+<div class="card" id="accountPasswordCard">
+<h2>تغییر رمز عبور مدیر ارشد</h2>
+<p class="muted">اگر با لینک بازیابی وارد پنل شده‌اید اما فرم تغییر رمز نمایش داده نشده، از این بخش رمز جدید تعیین کنید.</p>
+<div id="accountPasswordFields" class="hidden">
+<label for="panelNewPassword">رمز عبور جدید</label><input id="panelNewPassword" type="password" autocomplete="new-password">
+<label for="panelConfirmPassword">تکرار رمز عبور جدید</label><input id="panelConfirmPassword" type="password" autocomplete="new-password">
+<button id="panelSavePasswordBtn" class="primary" type="button" style="margin-top:14px">ذخیره رمز جدید</button>
+</div>
+<button id="showPasswordFieldsBtn" class="soft" type="button">تنظیم رمز جدید</button>
+<div id="panelPasswordMessage" class="message hidden" aria-live="polite"></div>
+</div>
 </section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -226,6 +238,21 @@ $('savePasswordBtn').addEventListener('click',async()=>{
  const {error}=await client.auth.updateUser({password:a});
  if(error){message($('loginMessage'),'تغییر رمز ناموفق بود: '+error.message,'error');return}
  await client.auth.signOut();$('recoveryFields').classList.add('hidden');$('loginFields').classList.remove('hidden');message($('loginMessage'),'رمز تغییر کرد. اکنون وارد شو.','success');
+});
+
+$('showPasswordFieldsBtn').addEventListener('click',()=>{
+ $('accountPasswordFields').classList.remove('hidden');
+ $('showPasswordFieldsBtn').classList.add('hidden');
+});
+$('panelSavePasswordBtn').addEventListener('click',async()=>{
+ const a=$('panelNewPassword').value,b=$('panelConfirmPassword').value;
+ if(a.length<8||a!==b){message($('panelPasswordMessage'),'رمز باید حداقل ۸ نویسه باشد و دو کادر یکسان باشند.','error');return}
+ $('panelSavePasswordBtn').disabled=true;
+ const {error}=await client.auth.updateUser({password:a});
+ $('panelSavePasswordBtn').disabled=false;
+ if(error){message($('panelPasswordMessage'),'تغییر رمز ناموفق بود: '+error.message,'error');return}
+ $('panelNewPassword').value='';$('panelConfirmPassword').value='';
+ message($('panelPasswordMessage'),'رمز عبور با موفقیت تغییر کرد. از این پس با رمز جدید وارد شوید.','success');
 });
 $('logoutBtn').addEventListener('click',()=>client.auth.signOut());
 $('refreshBtn').addEventListener('click',loadRequests);
