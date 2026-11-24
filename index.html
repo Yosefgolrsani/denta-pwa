@@ -66,6 +66,19 @@
 
 
 
+      <section class="workspace card" id="ownerSecretaryPanel" style="display:none">
+        <div class="section-title"><h2>مدیریت منشی‌های کلینیک</h2><span class="pill">ویژه مالک اصلی کلینیک</span></div>
+        <p class="muted">فقط مالک اصلی می‌تواند منشی‌های همین کلینیک را اضافه یا حذف کند.</p>
+        <form id="ownerSecretaryForm" class="data-form">
+          <label for="ownerSecretaryEmail">ایمیل حساب کاربری منشی</label>
+          <input id="ownerSecretaryEmail" type="email" required placeholder="secretary@example.com">
+          <button class="primary" type="submit" id="addOwnerSecretaryBtn">افزودن منشی</button>
+          <p id="ownerSecretaryMessage" class="message" aria-live="polite"></p>
+        </form>
+        <div class="section-title"><h2>فهرست منشی‌ها</h2></div>
+        <div id="ownerSecretaryList" class="record-list"><p class="muted">در حال بررسی...</p></div>
+      </section>
+
       <section class="workspace card" id="revenueReportPanel" style="display:none">
         <div class="section-title"><h2>گزارش درآمد کلینیک</h2><span class="pill">ویژه کاربران دارای مجوز مالی</span></div>
         <p class="muted">جمع پرداخت‌های ثبت‌شده در بازه انتخابی؛ مبالغ بر اساس تومان.</p>
