@@ -74,6 +74,24 @@ button:disabled{opacity:.55;cursor:wait}
 <div class="topline"><h2>فهرست درخواست‌ها</h2><select id="filter" style="max-width:190px"><option value="all">همه وضعیت‌ها</option><option value="pending">در انتظار بررسی</option><option value="approved">تأییدشده</option><option value="rejected">ردشده</option></select></div>
 <div id="requests"><p class="muted">در حال دریافت درخواست‌ها...</p></div>
 </div>
+
+<div class="card" id="usersAdmin">
+  <div class="topline"><h2>مدیریت کاربران کلینیک‌ها</h2><button id="refreshUsersBtn" class="soft" type="button">بروزرسانی کاربران</button></div>
+  <p class="muted">از این بخش می‌توانید حساب‌های ثبت‌نام‌شده را به‌عنوان مدیر کلینیک یا منشی معرفی کنید. حساب جدید باید ابتدا در دنتا ثبت‌نام کرده باشد.</p>
+  <label for="userClinicSelect">انتخاب کلینیک</label>
+  <select id="userClinicSelect"><option value="">در حال دریافت کلینیک‌ها...</option></select>
+  <form id="assignMemberForm">
+    <label for="memberEmail">ایمیل حساب ثبت‌نام‌شده در دنتا</label>
+    <input id="memberEmail" type="email" required placeholder="example@email.com" autocomplete="off">
+    <label for="memberRole">نقش موردنظر</label>
+    <select id="memberRole"><option value="manager">مدیر کلینیک</option><option value="secretary">منشی</option></select>
+    <button id="assignMemberBtn" class="primary" type="submit" style="margin-top:14px">ثبت دسترسی</button>
+  </form>
+  <div id="usersMessage" class="message hidden" aria-live="polite"></div>
+  <h3 style="margin-top:22px">اعضای کلینیک انتخاب‌شده</h3>
+  <div id="clinicMembers"><p class="muted">ابتدا یک کلینیک انتخاب کنید.</p></div>
+</div>
+
 <div class="card" id="articlesAdmin">
 <h2>مدیریت مقاله‌های مجله دنتا</h2>
 <p class="muted">مقاله‌ها را بنویسید، برای گوگل عنوان و توضیح تعیین کنید و پس از بررسی منتشر کنید.</p>
@@ -160,6 +178,75 @@ async function review(id,decision,note,button){
   await loadRequests();
   await loadArticles();
 }
+let clinicRows=[];
+async function loadUsers(){
+  const select=$('userClinicSelect');
+  select.innerHTML='<option value="">در حال دریافت کلینیک‌ها...</option>';
+  const {data,error}=await client.rpc('denta_super_admin_list_clinics');
+  if(error){select.innerHTML='<option value="">خطا در دریافت کلینیک‌ها</option>';message($('usersMessage'),'دریافت فهرست کلینیک‌ها ناموفق بود: '+error.message,'error');return}
+  clinicRows=Array.isArray(data)?data:[];
+  select.replaceChildren();
+  const first=document.createElement('option');first.value='';first.textContent='انتخاب کلینیک';select.appendChild(first);
+  clinicRows.forEach(clinic=>{
+    const option=document.createElement('option');
+    option.value=clinic.clinic_id;
+    option.textContent=clinic.clinic_name+' ('+clinic.member_count+' عضو)';
+    select.appendChild(option);
+  });
+  if(!clinicRows.length){const p=document.createElement('p');p.className='muted';p.textContent='هنوز کلینیکی ثبت نشده است.';$('clinicMembers').replaceChildren(p);return}
+  await loadClinicMembers();
+}
+async function loadClinicMembers(){
+  const clinicId=$('userClinicSelect').value;
+  const root=$('clinicMembers');root.replaceChildren();
+  if(!clinicId){const p=document.createElement('p');p.className='muted';p.textContent='ابتدا یک کلینیک انتخاب کنید.';root.appendChild(p);return}
+  const {data,error}=await client.rpc('denta_super_admin_list_members',{target_clinic:clinicId});
+  if(error){message($('usersMessage'),'دریافت اعضا ناموفق بود: '+error.message,'error');return}
+  const rows=Array.isArray(data)?data:[];
+  if(!rows.length){const p=document.createElement('p');p.className='muted';p.textContent='عضوی برای این کلینیک ثبت نشده است.';root.appendChild(p);return}
+  rows.forEach(member=>{
+    const card=document.createElement('article');card.className='request';
+    const title=document.createElement('h3');title.textContent=member.full_name||member.email||'کاربر بدون نام';card.appendChild(title);
+    const meta=document.createElement('div');meta.className='meta';
+    addLine(meta,'ایمیل',member.email);
+    addLine(meta,'نقش',member.role==='manager'?'مدیر کلینیک':member.role==='secretary'?'منشی':'دندان‌پزشک');
+    addLine(meta,'تاریخ عضویت',faDate(member.created_at));
+    if(member.is_owner)addLine(meta,'وضعیت مالک','مالک اصلی کلینیک');
+    card.appendChild(meta);
+    if(!member.is_owner){
+      const remove=document.createElement('button');remove.className='danger';remove.type='button';remove.textContent='حذف دسترسی';
+      remove.addEventListener('click',async()=>{
+        if(!confirm('دسترسی این کاربر به کلینیک حذف شود؟'))return;
+        remove.disabled=true;
+        const {error}=await client.rpc('denta_super_admin_remove_member',{target_member:member.member_id});
+        remove.disabled=false;
+        if(error){message($('usersMessage'),'حذف دسترسی انجام نشد: '+error.message,'error');return}
+        message($('usersMessage'),'دسترسی کاربر حذف شد.','success');
+        await loadUsers();
+      });
+      card.appendChild(remove);
+    }
+    root.appendChild(card);
+  });
+}
+$('userClinicSelect').addEventListener('change',loadClinicMembers);
+$('refreshUsersBtn').addEventListener('click',loadUsers);
+$('assignMemberForm').addEventListener('submit',async event=>{
+  event.preventDefault();
+  const clinicId=$('userClinicSelect').value;
+  const email=$('memberEmail').value.trim();
+  const role=$('memberRole').value;
+  if(!clinicId){message($('usersMessage'),'ابتدا کلینیک را انتخاب کنید.','error');return}
+  $('assignMemberBtn').disabled=true;
+  const {error}=await client.rpc('denta_super_admin_assign_member',{
+    target_clinic:clinicId,target_email:email,target_role:role
+  });
+  $('assignMemberBtn').disabled=false;
+  if(error){message($('usersMessage'),'ثبت دسترسی انجام نشد: '+error.message,'error');return}
+  $('assignMemberForm').reset();
+  message($('usersMessage'),'دسترسی کاربر با موفقیت ثبت شد.','success');
+  await loadUsers();
+});
 let articles=[];
 function articleMsg(text,type){message($('articleMessage'),text,type)}
 function resetArticleForm(){
@@ -206,6 +293,7 @@ async function checkAdmin(session){
   if(!data||data.role!=='super_admin'){await client.auth.signOut();showLogin('این حساب دسترسی مدیر ارشد دنتا ندارد.','error');return}
   $('loginBox').style.display='none';$('app').style.display='block';$('adminName').textContent='خوش آمدید، '+(data.full_name||'مدیر ارشد');
   await loadRequests();
+  await loadUsers();
 }
 async function start(){
  try{
