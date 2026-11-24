@@ -55,6 +55,26 @@
       </section>
 
 
+
+      <section class="workspace card" id="revenueReportPanel" style="display:none">
+        <div class="section-title"><h2>گزارش درآمد کلینیک</h2><span class="pill">ویژه کاربران دارای مجوز مالی</span></div>
+        <p class="muted">جمع پرداخت‌های ثبت‌شده در بازه انتخابی؛ مبالغ بر اساس تومان.</p>
+        <div class="report-filters">
+          <label for="revenueFrom">از تاریخ</label>
+          <input id="revenueFrom" type="date">
+          <label for="revenueTo">تا تاریخ</label>
+          <input id="revenueTo" type="date">
+          <button class="primary" type="button" id="loadRevenueReport">نمایش گزارش</button>
+        </div>
+        <div class="report-summary">
+          <article class="report-stat"><span>مجموع درآمد ثبت‌شده</span><strong id="revenueTotal">۰ تومان</strong></article>
+          <article class="report-stat"><span>تعداد پرداخت‌ها</span><strong id="revenueCount">۰</strong></article>
+        </div>
+        <div class="section-title"><h2>گزارش روزانه</h2></div>
+        <div id="revenueDailyList" class="record-list"><p class="muted">برای مشاهده گزارش، بازه زمانی را انتخاب کنید.</p></div>
+        <p id="revenueMessage" class="message" aria-live="polite"></p>
+      </section>
+
       <section class="workspace card" id="paymentsPanel" style="display:none">
         <div class="section-title"><h2>مدیریت پرداخت‌ها</h2><span class="pill">دسترسی مالی</span></div>
         <p class="muted">ثبت و ویرایش پرداخت‌های بیماران. حذف پرداخت از این بخش امکان‌پذیر نیست.</p>
