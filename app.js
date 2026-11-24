@@ -242,11 +242,108 @@ $('financeSecretaryList')?.addEventListener('click', async (event) => {
   }
 });
 
+
+async function loadPayments() {
+  const panel = $('paymentsPanel');
+  if (!panel || !activeClinicId) return;
+  panel.style.display = 'none';
+  const { data: allowed, error: accessError } = await supabase.rpc('denta_secretary_has_finance_access', {
+    target_clinic: activeClinicId
+  });
+  if (accessError || allowed !== true) return;
+  panel.style.display = '';
+  $('paymentPatient').innerHTML = '<option value="">انتخاب بیمار</option>' +
+    patientsCache.map(p => `<option value="${p.id}">${escapeHtml(p.full_name)}</option>`).join('');
+  const { data, error } = await supabase.from('payments')
+    .select('id, patient_id, amount, payment_date, description')
+    .eq('clinic_id', activeClinicId)
+    .order('payment_date', {ascending:false})
+    .limit(200);
+  if (error) {
+    $('paymentList').innerHTML = '<p class="muted">دریافت سوابق پرداخت ناموفق بود: ' + escapeHtml(error.message) + '</p>';
+    return;
+  }
+  const patientMap = new Map(patientsCache.map(p => [p.id,p]));
+  $('paymentList').innerHTML = data && data.length ? data.map(p => `
+    <article class="record">
+      <div>
+        <strong>${escapeHtml(patientMap.get(p.patient_id)?.full_name || 'بیمار')}</strong>
+        <small>${faNumber(p.amount)} تومان · ${p.payment_date ? escapeHtml(formatDate(p.payment_date)) : 'بدون تاریخ'}</small>
+        <small>${escapeHtml(p.description || 'بدون توضیحات')}</small>
+      </div>
+      <button type="button" class="small-action" data-edit-payment="${p.id}">ویرایش</button>
+    </article>`).join('') : '<p class="muted">هنوز پرداختی ثبت نشده است.</p>';
+  window.dentaPaymentsCache = data || [];
+}
+function resetPaymentForm() {
+  $('paymentForm').reset();
+  $('paymentId').value = '';
+  $('savePaymentBtn').textContent = 'ثبت پرداخت';
+  $('cancelPaymentEdit').style.display = 'none';
+}
+$('paymentForm')?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const id = $('paymentId').value;
+  const patient_id = $('paymentPatient').value;
+  const amount = Number($('paymentAmount').value);
+  const dateValue = $('paymentDate').value;
+  const description = $('paymentDescription').value.trim();
+  if (!patient_id || !Number.isFinite(amount) || amount <= 0) {
+    return setFormMessage('paymentMessage','بیمار و مبلغ معتبر را وارد کنید.',true);
+  }
+  if (!patientsCache.some(p => p.id === patient_id)) {
+    return setFormMessage('paymentMessage','بیمار انتخاب‌شده متعلق به این کلینیک نیست.',true);
+  }
+  const payload = {
+    clinic_id: activeClinicId,
+    patient_id,
+    amount,
+    payment_date: dateValue ? new Date(dateValue).toISOString() : new Date().toISOString(),
+    description: description || null
+  };
+  $('savePaymentBtn').disabled = true;
+  try {
+    const query = id
+      ? supabase.from('payments').update(payload).eq('id',id).eq('clinic_id',activeClinicId)
+      : supabase.from('payments').insert(payload);
+    const { error } = await query;
+    if (error) throw error;
+    setFormMessage('paymentMessage', id ? 'پرداخت ویرایش شد.' : 'پرداخت با موفقیت ثبت شد.');
+    resetPaymentForm();
+    await loadPayments();
+  } catch (error) {
+    setFormMessage('paymentMessage','ثبت یا ویرایش پرداخت ناموفق بود: '+error.message,true);
+  } finally {
+    $('savePaymentBtn').disabled = false;
+  }
+});
+$('paymentList')?.addEventListener('click', (event) => {
+  const button = event.target.closest('[data-edit-payment]');
+  if (!button) return;
+  const item = (window.dentaPaymentsCache || []).find(p => p.id === button.dataset.editPayment);
+  if (!item) return;
+  $('paymentId').value = item.id;
+  $('paymentPatient').value = item.patient_id;
+  $('paymentAmount').value = item.amount;
+  if (item.payment_date) {
+    const d = new Date(item.payment_date);
+    const local = new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+    $('paymentDate').value = local;
+  } else $('paymentDate').value = '';
+  $('paymentDescription').value = item.description || '';
+  $('savePaymentBtn').textContent = 'ذخیره ویرایش';
+  $('cancelPaymentEdit').style.display = '';
+  $('paymentForm').scrollIntoView({behavior:'smooth'});
+});
+$('cancelPaymentEdit')?.addEventListener('click', resetPaymentForm);
+
+
 async function refreshDashboard() {
   try {
     await loadPatients();
     await loadDentists();
     await loadAppointments();
+    await loadPayments();
   } catch (error) {
     showMessage('خطا در دریافت اطلاعات: ' + error.message, true);
   }
