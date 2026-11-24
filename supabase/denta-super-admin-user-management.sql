@@ -52,7 +52,7 @@ BEGIN
   END IF;
 
   RETURN QUERY
-  SELECT m.id, m.user_id, u.email,
+  SELECT m.id, m.user_id, u.email::text,
          COALESCE(u.raw_user_meta_data ->> 'full_name',
                   u.raw_user_meta_data ->> 'name',
                   u.raw_user_meta_data ->> 'manager_name'),
