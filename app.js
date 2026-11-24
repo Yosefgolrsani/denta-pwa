@@ -366,44 +366,48 @@ $('exportRevenueExcel')?.addEventListener('click', () => {
     setFormMessage('revenueMessage', 'ابتدا گزارش را نمایش دهید.', true);
     return;
   }
+  if (!window.XLSX) {
+    setFormMessage('revenueMessage', 'کتابخانه ساخت فایل اکسل بارگذاری نشد؛ اینترنت گوشی را بررسی و صفحه را تازه‌سازی کنید.', true);
+    return;
+  }
   const rows = [
     ['نوع گزارش', 'تاریخ یا ماه', 'تعداد پرداخت', 'مبلغ (تومان)'],
     ['خلاصه', revenueReportCache.fromDate + ' تا ' + revenueReportCache.toDate, revenueReportCache.paymentCount, revenueReportCache.totalAmount],
     ['گزارش روزانه', '', '', '']
   ];
-  revenueReportCache.daily.forEach(day => rows.push(['روزانه', day.day, day.payment_count, day.total_amount]));
+  revenueReportCache.daily.forEach(day => {
+    const date = new Date(String(day.day) + 'T12:00:00+03:30');
+    const label = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+      timeZone: 'Asia/Tehran', year: 'numeric', month: 'long', day: 'numeric'
+    }).format(date);
+    rows.push(['روزانه', label, Number(day.payment_count || 0), Number(day.total_amount || 0)]);
+  });
   const months = new Map();
-  const csvMonthKeyFormatter = new Intl.DateTimeFormat('en-u-ca-persian', {
+  const keyFormatter = new Intl.DateTimeFormat('en-u-ca-persian', {
     timeZone: 'Asia/Tehran', year: 'numeric', month: 'numeric'
   });
-  const csvMonthLabelFormatter = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+  const labelFormatter = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
     timeZone: 'Asia/Tehran', year: 'numeric', month: 'long'
   });
   revenueReportCache.daily.forEach(day => {
-    const dayDate = new Date(String(day.day) + 'T12:00:00+03:30');
-    const parts = Object.fromEntries(csvMonthKeyFormatter.formatToParts(dayDate)
-      .map(part => [part.type, part.value]));
+    const date = new Date(String(day.day) + 'T12:00:00+03:30');
+    const parts = Object.fromEntries(keyFormatter.formatToParts(date).map(part => [part.type, part.value]));
     const key = String(parts.year) + '-' + String(parts.month).padStart(2, '0');
-    const value = months.get(key) || { label: csvMonthLabelFormatter.format(dayDate), count: 0, amount: 0 };
+    const value = months.get(key) || { label: labelFormatter.format(date), count: 0, amount: 0 };
     value.count += Number(day.payment_count || 0);
     value.amount += Number(day.total_amount || 0);
     months.set(key, value);
   });
   rows.push(['گزارش ماهانه', '', '', '']);
-  [...months.entries()].sort((a,b) => a[0].localeCompare(b[0]))
+  [...months.entries()].sort((a, b) => a[0].localeCompare(b[0]))
     .forEach(([month, value]) => rows.push(['ماهانه', value.label, value.count, value.amount]));
-  const csv = '\uFEFF' + rows.map(row => row.map(value =>
-    '"' + String(value ?? '').replace(/"/g, '""') + '"'
-  ).join(',')).join('\r\n');
-  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `denta-revenue-${revenueReportCache.fromDate}-${revenueReportCache.toDate}.csv`;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
+  const sheet = XLSX.utils.aoa_to_sheet(rows);
+  sheet['!cols'] = [{wch:18},{wch:30},{wch:18},{wch:22}];
+  sheet['!views'] = [{rightToLeft:true}];
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, sheet, 'گزارش درآمد');
+  XLSX.writeFile(workbook, `denta-revenue-${revenueReportCache.fromDate}-${revenueReportCache.toDate}.xlsx`);
+  setFormMessage('revenueMessage', 'فایل اکسل واقعی با موفقیت آماده شد.');
 });
 
 function resetPaymentForm() {
