@@ -27,13 +27,8 @@ export default {
       });
     }
 
-    // صفحات عمومی درباره دنتا و مجله
-    if (url.pathname === "/about" || url.pathname === "/about/") {
-      return env.ASSETS.fetch(new Request(new URL("/about.html", url), request));
-    }
-    if (url.pathname === "/magazine" || url.pathname === "/magazine/") {
-      return env.ASSETS.fetch(new Request(new URL("/magazine.html" + url.search, url), request));
-    }
+    // صفحات عمومی درباره دنتا و مجله را به مسیریابی استاندارد HTML دارایی‌ها می‌سپاریم
+    // تا بازنویسی دستی مسیر باعث حلقه تغییر مسیر نشود.
 
     // پنل مدیر ارشد
     if (url.pathname === "/super-admin" || url.pathname === "/super-admin/") {
