@@ -313,9 +313,13 @@ async function loadRevenueReport() {
     });
     if (error) throw error;
     const report = data || {};
-    $('revenueTotal').textContent = faNumber(report.total_amount) + ' تومان';
-    $('revenueCount').textContent = faNumber(report.payment_count);
     const daily = Array.isArray(report.daily) ? report.daily : [];
+    const calculatedTotal = daily.reduce((sum, day) => sum + Number(day.total_amount || 0), 0);
+    const calculatedCount = daily.reduce((sum, day) => sum + Number(day.payment_count || 0), 0);
+    const totalAmount = report.total_amount ?? calculatedTotal;
+    const paymentCount = report.payment_count ?? calculatedCount;
+    $('revenueTotal').textContent = faNumber(totalAmount) + ' تومان';
+    $('revenueCount').textContent = faNumber(paymentCount);
     $('revenueDailyList').innerHTML = daily.length ? daily.map(day => {
       const dateLabel = new Intl.DateTimeFormat('fa-IR', {dateStyle:'medium'})
         .format(new Date(day.day + 'T12:00:00+03:30'));
