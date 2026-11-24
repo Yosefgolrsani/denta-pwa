@@ -277,10 +277,11 @@ async function loadPayments() {
 }
 
 function localDateInputValue(date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Tehran', year: 'numeric', month: '2-digit', day: '2-digit'
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
 }
 async function loadRevenueReport() {
   const panel = $('revenueReportPanel');
@@ -292,9 +293,9 @@ async function loadRevenueReport() {
   if (accessError || allowed !== true) return;
   panel.style.display = '';
   if (!$('revenueFrom').value || !$('revenueTo').value) {
-    const today = new Date();
-    $('revenueFrom').value = localDateInputValue(new Date(today.getFullYear(), today.getMonth(), 1));
-    $('revenueTo').value = localDateInputValue(today);
+    const today = localDateInputValue(new Date());
+    $('revenueFrom').value = today.slice(0, 7) + '-01';
+    $('revenueTo').value = today;
   }
   const fromDate = $('revenueFrom').value;
   const toDate = $('revenueTo').value;
@@ -400,6 +401,7 @@ async function refreshDashboard() {
     await loadDentists();
     await loadAppointments();
     await loadPayments();
+    await loadRevenueReport();
   } catch (error) {
     showMessage('خطا در دریافت اطلاعات: ' + error.message, true);
   }
