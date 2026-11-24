@@ -1,6 +1,7 @@
 let supabase = null;
 let currentUser = null;
 let activeClinicId = null;
+let revenueReportCache = null;
 let patientsCache = [];
 let dentistsCache = [];
 let recoveryMode = false;
@@ -318,8 +319,23 @@ async function loadRevenueReport() {
     const calculatedCount = daily.reduce((sum, day) => sum + Number(day.payment_count || 0), 0);
     const totalAmount = report.total_amount ?? calculatedTotal;
     const paymentCount = report.payment_count ?? calculatedCount;
+    revenueReportCache = { fromDate, toDate, totalAmount, paymentCount, daily };
     $('revenueTotal').textContent = faNumber(totalAmount) + ' تومان';
     $('revenueCount').textContent = faNumber(paymentCount);
+    const monthlyMap = new Map();
+    daily.forEach(day => {
+      const monthKey = String(day.day).slice(0, 7);
+      const current = monthlyMap.get(monthKey) || { total_amount: 0, payment_count: 0 };
+      current.total_amount += Number(day.total_amount || 0);
+      current.payment_count += Number(day.payment_count || 0);
+      monthlyMap.set(monthKey, current);
+    });
+    const monthly = [...monthlyMap.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+    $('revenueMonthlyList').innerHTML = monthly.length ? monthly.map(([month, values]) => {
+      const monthLabel = new Intl.DateTimeFormat('fa-IR', {year:'numeric', month:'long'})
+        .format(new Date(month + '-15T12:00:00+03:30'));
+      return `<article class="record"><div><strong>${escapeHtml(monthLabel)}</strong><small>${faNumber(values.payment_count)} پرداخت</small></div><strong>${faNumber(values.total_amount)} تومان</strong></article>`;
+    }).join('') : '<p class="muted">در این بازه پرداختی ثبت نشده است.</p>';
     $('revenueDailyList').innerHTML = daily.length ? daily.map(day => {
       const dateLabel = new Intl.DateTimeFormat('fa-IR', {dateStyle:'medium'})
         .format(new Date(day.day + 'T12:00:00+03:30'));
@@ -333,7 +349,43 @@ async function loadRevenueReport() {
     $('loadRevenueReport').disabled = false;
   }
 }
+
 $('loadRevenueReport')?.addEventListener('click', loadRevenueReport);
+$('exportRevenueExcel')?.addEventListener('click', () => {
+  if (!revenueReportCache) {
+    setFormMessage('revenueMessage', 'ابتدا گزارش را نمایش دهید.', true);
+    return;
+  }
+  const rows = [
+    ['نوع گزارش', 'تاریخ یا ماه', 'تعداد پرداخت', 'مبلغ (تومان)'],
+    ['خلاصه', revenueReportCache.fromDate + ' تا ' + revenueReportCache.toDate, revenueReportCache.paymentCount, revenueReportCache.totalAmount],
+    ['گزارش روزانه', '', '', '']
+  ];
+  revenueReportCache.daily.forEach(day => rows.push(['روزانه', day.day, day.payment_count, day.total_amount]));
+  const months = new Map();
+  revenueReportCache.daily.forEach(day => {
+    const key = String(day.day).slice(0, 7);
+    const value = months.get(key) || { count: 0, amount: 0 };
+    value.count += Number(day.payment_count || 0);
+    value.amount += Number(day.total_amount || 0);
+    months.set(key, value);
+  });
+  rows.push(['گزارش ماهانه', '', '', '']);
+  [...months.entries()].sort((a,b) => a[0].localeCompare(b[0]))
+    .forEach(([month, value]) => rows.push(['ماهانه', month, value.count, value.amount]));
+  const csv = '\uFEFF' + rows.map(row => row.map(value =>
+    '"' + String(value ?? '').replace(/"/g, '""') + '"'
+  ).join(',')).join('\r\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `denta-revenue-${revenueReportCache.fromDate}-${revenueReportCache.toDate}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+});
 
 function resetPaymentForm() {
   $('paymentForm').reset();
