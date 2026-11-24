@@ -244,6 +244,76 @@ $('financeSecretaryList')?.addEventListener('click', async (event) => {
 });
 
 
+async function loadOwnerSecretaryManagement() {
+  const panel = $('ownerSecretaryPanel');
+  const list = $('ownerSecretaryList');
+  if (!panel || !list || !activeClinicId) return;
+  panel.style.display = 'none';
+  const { data, error } = await supabase.rpc('denta_owner_list_secretaries', {
+    target_clinic: activeClinicId
+  });
+  if (error) {
+    list.innerHTML = '<p class="muted">مدیریت منشی‌ها فقط برای مالک اصلی کلینیک فعال است.</p>';
+    return;
+  }
+  panel.style.display = '';
+  list.innerHTML = data && data.length ? data.map(member => `
+    <article class="record">
+      <div>
+        <strong>${escapeHtml(member.user_email || 'منشی')}</strong>
+        <small>${member.finance_enabled ? 'دسترسی مالی فعال است' : 'دسترسی مالی غیرفعال است'}</small>
+        <small>عضویت: ${escapeHtml(formatDate(member.created_at))}</small>
+      </div>
+      <button type="button" class="small-action" data-remove-owner-secretary="${member.member_id}">حذف منشی</button>
+    </article>`).join('') : '<p class="muted">هنوز منشی‌ای برای این کلینیک ثبت نشده است.</p>';
+}
+
+$('ownerSecretaryForm')?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const email = $('ownerSecretaryEmail').value.trim();
+  if (!email || !activeClinicId) return;
+  const button = $('addOwnerSecretaryBtn');
+  button.disabled = true;
+  setFormMessage('ownerSecretaryMessage', 'در حال افزودن منشی...');
+  try {
+    const { data, error } = await supabase.rpc('denta_owner_add_secretary', {
+      target_clinic: activeClinicId,
+      target_email: email
+    });
+    if (error) throw error;
+    $('ownerSecretaryForm').reset();
+    setFormMessage('ownerSecretaryMessage', 'منشی با موفقیت اضافه شد.');
+    await loadOwnerSecretaryManagement();
+    await loadFinancePermissionManagement();
+  } catch (error) {
+    setFormMessage('ownerSecretaryMessage', 'افزودن منشی انجام نشد: ' + error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+$('ownerSecretaryList')?.addEventListener('click', async (event) => {
+  const button = event.target.closest('[data-remove-owner-secretary]');
+  if (!button) return;
+  if (!window.confirm('آیا از حذف دسترسی این منشی از کلینیک مطمئن هستید؟')) return;
+  button.disabled = true;
+  setFormMessage('ownerSecretaryMessage', 'در حال حذف منشی...');
+  try {
+    const { error } = await supabase.rpc('denta_owner_remove_secretary', {
+      target_clinic: activeClinicId,
+      target_secretary_member: button.dataset.removeOwnerSecretary
+    });
+    if (error) throw error;
+    setFormMessage('ownerSecretaryMessage', 'دسترسی منشی حذف شد.');
+    await loadOwnerSecretaryManagement();
+    await loadFinancePermissionManagement();
+  } catch (error) {
+    setFormMessage('ownerSecretaryMessage', 'حذف منشی انجام نشد: ' + error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
 async function loadPayments() {
   const panel = $('paymentsPanel');
   if (!panel || !activeClinicId) return;
@@ -628,6 +698,7 @@ async function afterLogin(session) {
   currentUser = session.user;
   await loadClinicContext();
   await loadFinancePermissionManagement();
+  await loadOwnerSecretaryManagement();
   showDashboard(true);
   logoutBtn.style.display = '';
   await refreshDashboard();
