@@ -47,6 +47,13 @@
         <button class="quick-item" id="refreshData" type="button"><span>↻</span>به‌روزرسانی</button>
       </div>
 
+      <section class="workspace card" id="financePermissionPanel" style="display:none">
+        <div class="section-title"><h2>مجوز مالی منشی‌ها</h2><span class="pill">ویژه مالک اصلی کلینیک</span></div>
+        <p class="muted">فقط مالک اصلی کلینیک می‌تواند دسترسی مالی هر منشی را فعال یا لغو کند.</p>
+        <div id="financeSecretaryList" class="record-list"><p class="muted">در حال بررسی دسترسی...</p></div>
+        <p id="financePermissionMessage" class="message" aria-live="polite"></p>
+      </section>
+
       <section class="workspace card" id="patientsPanel">
         <div class="section-title"><h2>مدیریت بیماران</h2><span class="pill">ثبت و جستجو</span></div>
         <form id="patientForm" class="data-form">
