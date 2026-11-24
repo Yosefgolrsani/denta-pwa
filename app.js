@@ -184,6 +184,64 @@ async function loadAppointments() {
     </article>`;
   }).join('') : '<p class="muted">نوبت آینده‌ای ثبت نشده است.</p>';
 }
+async function loadFinancePermissionManagement() {
+  const panel = $('financePermissionPanel');
+  const list = $('financeSecretaryList');
+  if (!panel || !list || !activeClinicId) return;
+  panel.style.display = 'none';
+  const { data, error } = await supabase.rpc('denta_owner_list_secretary_finance_access', {
+    target_clinic: activeClinicId
+  });
+  // The RPC returns data only to the primary owner; other clinic members see no panel.
+  if (error) {
+    list.innerHTML = '<p class="muted">مدیریت مجوز مالی فقط برای مالک اصلی کلینیک فعال است.</p>';
+    return;
+  }
+  panel.style.display = '';
+  if (!data || data.length === 0) {
+    list.innerHTML = '<p class="muted">برای این کلینیک منشی‌ای ثبت نشده است.</p>';
+    return;
+  }
+  list.innerHTML = data.map(member => `
+    <article class="record">
+      <div>
+        <strong>${escapeHtml(member.full_name || member.user_email || 'منشی')}</strong>
+        <small>${escapeHtml(member.user_email || '')}</small>
+        <small>${member.finance_enabled ? 'دسترسی مالی فعال است' : 'دسترسی مالی غیرفعال است'}</small>
+      </div>
+      <button type="button" class="small-action" data-finance-member="${member.member_id}" data-finance-enabled="${member.finance_enabled ? 'true' : 'false'}">
+        ${member.finance_enabled ? 'لغو دسترسی' : 'فعال‌سازی دسترسی'}
+      </button>
+    </article>`).join('');
+}
+
+$('financeSecretaryList')?.addEventListener('click', async (event) => {
+  const button = event.target.closest('[data-finance-member]');
+  if (!button) return;
+  const memberId = button.dataset.financeMember;
+  const enabled = button.dataset.financeEnabled === 'true';
+  button.disabled = true;
+  setFormMessage('financePermissionMessage', 'در حال ثبت تغییر...');
+  try {
+    const functionName = enabled
+      ? 'denta_revoke_secretary_finance_access'
+      : 'denta_grant_secretary_finance_access';
+    const { error } = await supabase.rpc(functionName, {
+      target_clinic: activeClinicId,
+      target_secretary_member: memberId
+    });
+    if (error) throw error;
+    setFormMessage('financePermissionMessage', enabled
+      ? 'دسترسی مالی منشی لغو شد.'
+      : 'دسترسی مالی منشی فعال شد.');
+    await loadFinancePermissionManagement();
+  } catch (error) {
+    setFormMessage('financePermissionMessage', 'تغییر دسترسی انجام نشد: ' + error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
 async function refreshDashboard() {
   try {
     await loadPatients();
@@ -335,6 +393,7 @@ savePasswordBtn.addEventListener('click', async () => {
 async function afterLogin(session) {
   currentUser = session.user;
   await loadClinicContext();
+  await loadFinancePermissionManagement();
   showDashboard(true);
   logoutBtn.style.display = '';
   await refreshDashboard();
