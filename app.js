@@ -1,6 +1,7 @@
 let supabase = null;
 let currentUser = null;
 let activeClinicId = null;
+let revenueReportCache = null;
 let patientsCache = [];
 let dentistsCache = [];
 let recoveryMode = false;
@@ -184,11 +185,372 @@ async function loadAppointments() {
     </article>`;
   }).join('') : '<p class="muted">نوبت آینده‌ای ثبت نشده است.</p>';
 }
+async function loadFinancePermissionManagement() {
+  const panel = $('financePermissionPanel');
+  const list = $('financeSecretaryList');
+  if (!panel || !list || !activeClinicId) return;
+  panel.style.display = 'none';
+  const { data, error } = await supabase.rpc('denta_owner_list_secretary_finance_access', {
+    target_clinic: activeClinicId
+  });
+  // The RPC returns data only to the primary owner; other clinic members see no panel.
+  if (error) {
+    list.innerHTML = '<p class="muted">مدیریت مجوز مالی فقط برای مالک اصلی کلینیک فعال است.</p>';
+    return;
+  }
+  panel.style.display = '';
+  if (!data || data.length === 0) {
+    list.innerHTML = '<p class="muted">برای این کلینیک منشی‌ای ثبت نشده است.</p>';
+    return;
+  }
+  list.innerHTML = data.map(member => `
+    <article class="record">
+      <div>
+        <strong>${escapeHtml(member.full_name || member.user_email || 'منشی')}</strong>
+        <small>${escapeHtml(member.user_email || '')}</small>
+        <small>${member.finance_enabled ? 'دسترسی مالی فعال است' : 'دسترسی مالی غیرفعال است'}</small>
+      </div>
+      <button type="button" class="small-action" data-finance-member="${member.member_id}" data-finance-enabled="${member.finance_enabled ? 'true' : 'false'}">
+        ${member.finance_enabled ? 'لغو دسترسی' : 'فعال‌سازی دسترسی'}
+      </button>
+    </article>`).join('');
+}
+
+$('financeSecretaryList')?.addEventListener('click', async (event) => {
+  const button = event.target.closest('[data-finance-member]');
+  if (!button) return;
+  const memberId = button.dataset.financeMember;
+  const enabled = button.dataset.financeEnabled === 'true';
+  button.disabled = true;
+  setFormMessage('financePermissionMessage', 'در حال ثبت تغییر...');
+  try {
+    const functionName = enabled
+      ? 'denta_revoke_secretary_finance_access'
+      : 'denta_grant_secretary_finance_access';
+    const { error } = await supabase.rpc(functionName, {
+      target_clinic: activeClinicId,
+      target_secretary_member: memberId
+    });
+    if (error) throw error;
+    setFormMessage('financePermissionMessage', enabled
+      ? 'دسترسی مالی منشی لغو شد.'
+      : 'دسترسی مالی منشی فعال شد.');
+    await loadFinancePermissionManagement();
+  } catch (error) {
+    setFormMessage('financePermissionMessage', 'تغییر دسترسی انجام نشد: ' + error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+
+async function loadOwnerSecretaryManagement() {
+  const panel = $('ownerSecretaryPanel');
+  const list = $('ownerSecretaryList');
+  if (!panel || !list || !activeClinicId) return;
+  panel.style.display = 'none';
+  const { data, error } = await supabase.rpc('denta_owner_list_secretaries', {
+    target_clinic: activeClinicId
+  });
+  if (error) {
+    list.innerHTML = '<p class="muted">مدیریت منشی‌ها فقط برای مالک اصلی کلینیک فعال است.</p>';
+    return;
+  }
+  panel.style.display = '';
+  list.innerHTML = data && data.length ? data.map(member => `
+    <article class="record">
+      <div>
+        <strong>${escapeHtml(member.user_email || 'منشی')}</strong>
+        <small>${member.finance_enabled ? 'دسترسی مالی فعال است' : 'دسترسی مالی غیرفعال است'}</small>
+        <small>عضویت: ${escapeHtml(formatDate(member.created_at))}</small>
+      </div>
+      <button type="button" class="small-action" data-remove-owner-secretary="${member.member_id}">حذف منشی</button>
+    </article>`).join('') : '<p class="muted">هنوز منشی‌ای برای این کلینیک ثبت نشده است.</p>';
+}
+
+$('ownerSecretaryForm')?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const email = $('ownerSecretaryEmail').value.trim();
+  if (!email || !activeClinicId) return;
+  const button = $('addOwnerSecretaryBtn');
+  button.disabled = true;
+  setFormMessage('ownerSecretaryMessage', 'در حال افزودن منشی...');
+  try {
+    const { data, error } = await supabase.rpc('denta_owner_add_secretary', {
+      target_clinic: activeClinicId,
+      target_email: email
+    });
+    if (error) throw error;
+    $('ownerSecretaryForm').reset();
+    setFormMessage('ownerSecretaryMessage', 'منشی با موفقیت اضافه شد.');
+    await loadOwnerSecretaryManagement();
+    await loadFinancePermissionManagement();
+  } catch (error) {
+    setFormMessage('ownerSecretaryMessage', 'افزودن منشی انجام نشد: ' + error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+$('ownerSecretaryList')?.addEventListener('click', async (event) => {
+  const button = event.target.closest('[data-remove-owner-secretary]');
+  if (!button) return;
+  if (!window.confirm('آیا از حذف دسترسی این منشی از کلینیک مطمئن هستید؟')) return;
+  button.disabled = true;
+  setFormMessage('ownerSecretaryMessage', 'در حال حذف منشی...');
+  try {
+    const { error } = await supabase.rpc('denta_owner_remove_secretary', {
+      target_clinic: activeClinicId,
+      target_secretary_member: button.dataset.removeOwnerSecretary
+    });
+    if (error) throw error;
+    setFormMessage('ownerSecretaryMessage', 'دسترسی منشی حذف شد.');
+    await loadOwnerSecretaryManagement();
+    await loadFinancePermissionManagement();
+  } catch (error) {
+    setFormMessage('ownerSecretaryMessage', 'حذف منشی انجام نشد: ' + error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+async function loadPayments() {
+  const panel = $('paymentsPanel');
+  if (!panel || !activeClinicId) return;
+  panel.style.display = 'none';
+  const { data: allowed, error: accessError } = await supabase.rpc('denta_secretary_has_finance_access', {
+    target_clinic: activeClinicId
+  });
+  if (accessError || allowed !== true) return;
+  panel.style.display = '';
+  $('paymentPatient').innerHTML = '<option value="">انتخاب بیمار</option>' +
+    patientsCache.map(p => `<option value="${p.id}">${escapeHtml(p.full_name)}</option>`).join('');
+  const { data, error } = await supabase.from('payments')
+    .select('id, patient_id, amount, payment_date, description')
+    .eq('clinic_id', activeClinicId)
+    .order('payment_date', {ascending:false})
+    .limit(200);
+  if (error) {
+    $('paymentList').innerHTML = '<p class="muted">دریافت سوابق پرداخت ناموفق بود: ' + escapeHtml(error.message) + '</p>';
+    return;
+  }
+  const patientMap = new Map(patientsCache.map(p => [p.id,p]));
+  $('paymentList').innerHTML = data && data.length ? data.map(p => `
+    <article class="record">
+      <div>
+        <strong>${escapeHtml(patientMap.get(p.patient_id)?.full_name || 'بیمار')}</strong>
+        <small>${faNumber(p.amount)} تومان · ${p.payment_date ? escapeHtml(formatDate(p.payment_date)) : 'بدون تاریخ'}</small>
+        <small>${escapeHtml(p.description || 'بدون توضیحات')}</small>
+      </div>
+      <button type="button" class="small-action" data-edit-payment="${p.id}">ویرایش</button>
+    </article>`).join('') : '<p class="muted">هنوز پرداختی ثبت نشده است.</p>';
+  window.dentaPaymentsCache = data || [];
+}
+
+function localDateInputValue(date) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Tehran', year: 'numeric', month: '2-digit', day: '2-digit'
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+async function loadRevenueReport() {
+  const panel = $('revenueReportPanel');
+  if (!panel || !activeClinicId) return;
+  panel.style.display = 'none';
+  const { data: allowed, error: accessError } = await supabase.rpc('denta_secretary_has_finance_access', {
+    target_clinic: activeClinicId
+  });
+  if (accessError || allowed !== true) return;
+  panel.style.display = '';
+  if (!$('revenueFrom').value || !$('revenueTo').value) {
+    const today = localDateInputValue(new Date());
+    $('revenueFrom').value = today.slice(0, 7) + '-01';
+    $('revenueTo').value = today;
+  }
+  const fromDate = $('revenueFrom').value;
+  const toDate = $('revenueTo').value;
+  if (fromDate > toDate) {
+    setFormMessage('revenueMessage', 'تاریخ شروع نباید بعد از تاریخ پایان باشد.', true);
+    return;
+  }
+  $('loadRevenueReport').disabled = true;
+  setFormMessage('revenueMessage', 'در حال دریافت گزارش...');
+  try {
+    const { data, error } = await supabase.rpc('denta_clinic_revenue_report', {
+      target_clinic: activeClinicId,
+      p_from_date: fromDate,
+      p_to_date: toDate
+    });
+    if (error) throw error;
+    const report = data || {};
+    const daily = Array.isArray(report.daily) ? report.daily : [];
+    const calculatedTotal = daily.reduce((sum, day) => sum + Number(day.total_amount || 0), 0);
+    const calculatedCount = daily.reduce((sum, day) => sum + Number(day.payment_count || 0), 0);
+    const totalAmount = report.total_amount ?? calculatedTotal;
+    const paymentCount = report.payment_count ?? calculatedCount;
+    revenueReportCache = { fromDate, toDate, totalAmount, paymentCount, daily };
+    $('revenueTotal').textContent = faNumber(totalAmount) + ' تومان';
+    $('revenueCount').textContent = faNumber(paymentCount);
+    const monthlyMap = new Map();
+    const persianMonthKeyFormatter = new Intl.DateTimeFormat('en-u-ca-persian', {
+      timeZone: 'Asia/Tehran', year: 'numeric', month: 'numeric'
+    });
+    const persianMonthLabelFormatter = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+      timeZone: 'Asia/Tehran', year: 'numeric', month: 'long'
+    });
+    daily.forEach(day => {
+      const dayDate = new Date(String(day.day) + 'T12:00:00+03:30');
+      const parts = Object.fromEntries(persianMonthKeyFormatter.formatToParts(dayDate)
+        .map(part => [part.type, part.value]));
+      const monthKey = String(parts.year) + '-' + String(parts.month).padStart(2, '0');
+      const current = monthlyMap.get(monthKey) || {
+        label: persianMonthLabelFormatter.format(dayDate),
+        total_amount: 0, payment_count: 0
+      };
+      current.total_amount += Number(day.total_amount || 0);
+      current.payment_count += Number(day.payment_count || 0);
+      monthlyMap.set(monthKey, current);
+    });
+    const monthly = [...monthlyMap.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+    $('revenueMonthlyList').innerHTML = monthly.length ? monthly.map(([month, values]) => {
+      return `<article class="record"><div><strong>${escapeHtml(values.label)}</strong><small>${faNumber(values.payment_count)} پرداخت</small></div><strong>${faNumber(values.total_amount)} تومان</strong></article>`;
+    }).join('') : '<p class="muted">در این بازه پرداختی ثبت نشده است.</p>';
+    $('revenueDailyList').innerHTML = daily.length ? daily.map(day => {
+      const dateLabel = new Intl.DateTimeFormat('fa-IR', {dateStyle:'medium'})
+        .format(new Date(day.day + 'T12:00:00+03:30'));
+      return `<article class="record"><div><strong>${escapeHtml(dateLabel)}</strong><small>${faNumber(day.payment_count)} پرداخت</small></div><strong>${faNumber(day.total_amount)} تومان</strong></article>`;
+    }).join('') : '<p class="muted">در این بازه پرداختی ثبت نشده است.</p>';
+    setFormMessage('revenueMessage', 'گزارش با موفقیت به‌روزرسانی شد.');
+  } catch (error) {
+    $('revenueDailyList').innerHTML = '<p class="muted">دریافت گزارش ناموفق بود.</p>';
+    setFormMessage('revenueMessage', 'خطا در دریافت گزارش: ' + error.message, true);
+  } finally {
+    $('loadRevenueReport').disabled = false;
+  }
+}
+
+$('loadRevenueReport')?.addEventListener('click', loadRevenueReport);
+$('exportRevenueExcel')?.addEventListener('click', () => {
+  if (!revenueReportCache) {
+    setFormMessage('revenueMessage', 'ابتدا گزارش را نمایش دهید.', true);
+    return;
+  }
+  if (!window.XLSX) {
+    setFormMessage('revenueMessage', 'کتابخانه ساخت فایل اکسل بارگذاری نشد؛ اینترنت گوشی را بررسی و صفحه را تازه‌سازی کنید.', true);
+    return;
+  }
+  const rows = [
+    ['نوع گزارش', 'تاریخ یا ماه', 'تعداد پرداخت', 'مبلغ (تومان)'],
+    ['خلاصه', revenueReportCache.fromDate + ' تا ' + revenueReportCache.toDate, revenueReportCache.paymentCount, revenueReportCache.totalAmount],
+    ['گزارش روزانه', '', '', '']
+  ];
+  revenueReportCache.daily.forEach(day => {
+    const date = new Date(String(day.day) + 'T12:00:00+03:30');
+    const label = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+      timeZone: 'Asia/Tehran', year: 'numeric', month: 'long', day: 'numeric'
+    }).format(date);
+    rows.push(['روزانه', label, Number(day.payment_count || 0), Number(day.total_amount || 0)]);
+  });
+  const months = new Map();
+  const keyFormatter = new Intl.DateTimeFormat('en-u-ca-persian', {
+    timeZone: 'Asia/Tehran', year: 'numeric', month: 'numeric'
+  });
+  const labelFormatter = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+    timeZone: 'Asia/Tehran', year: 'numeric', month: 'long'
+  });
+  revenueReportCache.daily.forEach(day => {
+    const date = new Date(String(day.day) + 'T12:00:00+03:30');
+    const parts = Object.fromEntries(keyFormatter.formatToParts(date).map(part => [part.type, part.value]));
+    const key = String(parts.year) + '-' + String(parts.month).padStart(2, '0');
+    const value = months.get(key) || { label: labelFormatter.format(date), count: 0, amount: 0 };
+    value.count += Number(day.payment_count || 0);
+    value.amount += Number(day.total_amount || 0);
+    months.set(key, value);
+  });
+  rows.push(['گزارش ماهانه', '', '', '']);
+  [...months.entries()].sort((a, b) => a[0].localeCompare(b[0]))
+    .forEach(([month, value]) => rows.push(['ماهانه', value.label, value.count, value.amount]));
+  const sheet = XLSX.utils.aoa_to_sheet(rows);
+  sheet['!cols'] = [{wch:18},{wch:30},{wch:18},{wch:22}];
+  sheet['!views'] = [{rightToLeft:true}];
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, sheet, 'گزارش درآمد');
+  XLSX.writeFile(workbook, `denta-revenue-${revenueReportCache.fromDate}-${revenueReportCache.toDate}.xlsx`);
+  setFormMessage('revenueMessage', 'فایل اکسل واقعی با موفقیت آماده شد.');
+});
+
+function resetPaymentForm() {
+  $('paymentForm').reset();
+  $('paymentId').value = '';
+  $('savePaymentBtn').textContent = 'ثبت پرداخت';
+  $('cancelPaymentEdit').style.display = 'none';
+}
+$('paymentForm')?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const id = $('paymentId').value;
+  const patient_id = $('paymentPatient').value;
+  const amount = Number($('paymentAmount').value);
+  const dateValue = $('paymentDate').value;
+  const description = $('paymentDescription').value.trim();
+  if (!patient_id || !Number.isFinite(amount) || amount <= 0) {
+    return setFormMessage('paymentMessage','بیمار و مبلغ معتبر را وارد کنید.',true);
+  }
+  if (!patientsCache.some(p => p.id === patient_id)) {
+    return setFormMessage('paymentMessage','بیمار انتخاب‌شده متعلق به این کلینیک نیست.',true);
+  }
+  const payload = {
+    clinic_id: activeClinicId,
+    patient_id,
+    amount,
+    payment_date: dateValue ? new Date(dateValue).toISOString() : new Date().toISOString(),
+    description: description || null
+  };
+  $('savePaymentBtn').disabled = true;
+  try {
+    const query = id
+      ? supabase.from('payments').update(payload).eq('id',id).eq('clinic_id',activeClinicId)
+      : supabase.from('payments').insert(payload);
+    const { error } = await query;
+    if (error) throw error;
+    setFormMessage('paymentMessage', id ? 'پرداخت ویرایش شد.' : 'پرداخت با موفقیت ثبت شد.');
+    resetPaymentForm();
+    await loadPayments();
+    await loadRevenueReport();
+  } catch (error) {
+    setFormMessage('paymentMessage','ثبت یا ویرایش پرداخت ناموفق بود: '+error.message,true);
+  } finally {
+    $('savePaymentBtn').disabled = false;
+  }
+});
+$('paymentList')?.addEventListener('click', (event) => {
+  const button = event.target.closest('[data-edit-payment]');
+  if (!button) return;
+  const item = (window.dentaPaymentsCache || []).find(p => p.id === button.dataset.editPayment);
+  if (!item) return;
+  $('paymentId').value = item.id;
+  $('paymentPatient').value = item.patient_id;
+  $('paymentAmount').value = item.amount;
+  if (item.payment_date) {
+    const d = new Date(item.payment_date);
+    const local = new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+    $('paymentDate').value = local;
+  } else $('paymentDate').value = '';
+  $('paymentDescription').value = item.description || '';
+  $('savePaymentBtn').textContent = 'ذخیره ویرایش';
+  $('cancelPaymentEdit').style.display = '';
+  $('paymentForm').scrollIntoView({behavior:'smooth'});
+});
+$('cancelPaymentEdit')?.addEventListener('click', resetPaymentForm);
+
+
 async function refreshDashboard() {
   try {
     await loadPatients();
     await loadDentists();
     await loadAppointments();
+    await loadPayments();
+    await loadRevenueReport();
   } catch (error) {
     showMessage('خطا در دریافت اطلاعات: ' + error.message, true);
   }
@@ -335,6 +697,8 @@ savePasswordBtn.addEventListener('click', async () => {
 async function afterLogin(session) {
   currentUser = session.user;
   await loadClinicContext();
+  await loadFinancePermissionManagement();
+  await loadOwnerSecretaryManagement();
   showDashboard(true);
   logoutBtn.style.display = '';
   await refreshDashboard();

@@ -9,3 +9,29 @@ body.dark{--card:#172a24;--bg:#0f1d18;color:#e6f2ec;--muted:#a2b5aa;--line:#2942
 
 /* Keep the logout label on one line on small screens */
 .topbar .logout-btn{width:auto;min-width:112px;height:42px;padding:0 14px;white-space:nowrap;flex:0 0 auto;font-family:inherit;font-size:14px;line-height:1.2;}
+
+
+.report-filters{display:grid;grid-template-columns:1fr 1fr;gap:9px;max-width:620px;margin:16px 0}
+.report-filters label{font-size:13px;font-weight:600;align-self:end}
+.report-filters input{min-height:46px;padding:10px 12px;border:1px solid var(--line);border-radius:11px;background:var(--bg,#f5f8f6);color:inherit;font:inherit;width:100%}
+.report-filters .primary{grid-column:1/-1;margin-top:4px}
+.report-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+.report-stat{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--bg,#f5f8f6)}
+.report-stat span{display:block;color:var(--muted);font-size:12px}
+.report-stat strong{display:block;color:var(--green);font-size:clamp(18px,4vw,25px);margin-top:8px;overflow-wrap:anywhere}
+@media(max-width:650px){.report-summary{grid-template-columns:1fr}.report-filters{grid-template-columns:1fr}}
+
+/* Social impact section */
+.children-support{display:flex;align-items:flex-start;gap:18px;margin:0 0 26px;padding:22px;border:1px solid #cce8d9;border-radius:20px;background:linear-gradient(135deg,#edf9f2 0%,#fff 100%);box-shadow:0 8px 28px #174b350a}
+.support-symbol{display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;border-radius:16px;background:#d8f3e3;color:#087f5b;font-size:25px}
+.support-copy{min-width:0}
+.support-eyebrow{display:block;color:#087f5b;font-size:12px;font-weight:800;margin-bottom:5px}
+.support-copy h2{margin:0 0 9px;color:#174b35;font-size:20px}
+.support-copy p{margin:0;color:#38584a;font-size:14px;line-height:2}
+.support-copy small{display:block;margin-top:10px;color:#71877b;font-size:11px;line-height:1.8}
+body.dark .children-support{background:linear-gradient(135deg,#18372b 0%,#172a24 100%);border-color:#315b45}
+body.dark .support-symbol{background:#244b37;color:#8be0ae}
+body.dark .support-copy h2{color:#e6f2ec}
+body.dark .support-copy p{color:#c4d9cc}
+body.dark .support-copy small{color:#a2b5aa}
+@media(max-width:650px){.children-support{gap:12px;padding:16px}.support-symbol{flex-basis:40px;width:40px;height:40px;border-radius:13px}.support-copy h2{font-size:17px}.support-copy p{font-size:13px}}
