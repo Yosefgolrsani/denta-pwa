@@ -213,6 +213,18 @@ footer{margin-top:90px}
  .editorial-actions{gap:13px}
 }
 
+
+/* Real dental hero photograph */
+.hero-art{min-height:390px}
+.hero-photo-frame{position:relative;width:min(100%,470px);height:365px;border-radius:34px;overflow:hidden;border:1px solid #ffffff55;box-shadow:0 35px 90px #06192b70;background:#dbe7ec}
+.hero-photo{display:block;width:100%;height:100%;object-fit:cover;object-position:center 43%}
+.hero-photo-caption{position:absolute;right:18px;left:18px;bottom:18px;display:flex;align-items:center;gap:12px;padding:13px 16px;border:1px solid #ffffff70;border-radius:17px;background:#102b46d9;backdrop-filter:blur(10px);color:#fff;box-shadow:0 12px 30px #06192b35}
+.hero-photo-caption strong,.hero-photo-caption small{display:block}
+.hero-photo-caption strong{font-size:13px}
+.hero-photo-caption small{margin-top:3px;color:#d7e4ec;font-size:10px}
+.photo-spark{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border-radius:11px;background:#e6d2a6;color:#17334a;font-size:18px}
+@media(max-width:1024px){.hero-art{min-height:245px}.hero-photo-frame{height:235px;max-width:340px;border-radius:25px}.hero-photo-caption{right:10px;left:10px;bottom:10px;padding:9px 11px}.hero-photo-caption strong{font-size:11px}.hero-photo-caption small{font-size:9px}}
+
 </style>
 </head>
 <body>
@@ -238,17 +250,10 @@ footer{margin-top:90px}
     <p class="hero-copy">در دنتا، کلینیک‌های دندان‌پزشکی را جستجو کنید، با خدمات و اطلاعات تماس آن‌ها آشنا شوید و با اطمینان بیشتری برای مراقبت از لبخندتان تصمیم بگیرید.</p>
     <div class="hero-actions"><a class="btn primary" href="#clinic-search">جستجوی کلینیک‌ها</a><a class="btn outline" href="/register">معرفی کلینیک من</a></div>
    </div>
-   <div class="hero-art" aria-label="نمای تصویری دنتا">
-    <div class="art-card">
-     <div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div>
-     <div class="art-glass">
-      <span class="art-label">DENTA • SMART CHOICE</span>
-      <div class="tooth-symbol">✧</div>
-      <strong class="art-main-title">لبخند، با انتخابی مطمئن</strong>
-      <span class="art-subtitle">مسیر آشنایی با کلینیک‌های دندان‌پزشکی</span>
-     </div>
-     <div class="art-floating"><span>✦</span><div><b>انتخاب آگاهانه</b><small>اطلاعات در دسترس شما</small></div></div>
-     <div class="art-caption"><span><strong>همراه انتخاب مطمئن شما</strong><br>از جستجو تا ارتباط</span><span>✦ DENTA</span></div>
+   <div class="hero-art" aria-label="تصویر فضای دندان‌پزشکی دنتا">
+    <div class="hero-photo-frame">
+     <img class="hero-photo" src="https://raw.githubusercontent.com/Yosefgolrsani/denta-pwa/main/denta-hero-photo.jpg" alt="بیمار خندان در فضای دندان‌پزشکی" fetchpriority="high">
+     <div class="hero-photo-caption"><span class="photo-spark">✦</span><span><strong>لبخند، با انتخابی مطمئن</strong><small>همراه شما در مسیر انتخاب آگاهانه</small></span></div>
     </div>
    </div>
   </div>
