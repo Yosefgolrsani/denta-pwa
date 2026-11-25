@@ -258,6 +258,51 @@ footer{margin-top:90px}
  
 }
 
+
+/* Approved Denta reference composition */
+.hero{background:#eaf3fb;color:#123c58;padding:0;min-height:0;display:block}
+.hero:before,.hero:after{display:none}
+.hero-inner{max-width:none;width:100%;grid-template-columns:.88fr 1.12fr;gap:0;direction:rtl}
+.hero-inner>div:first-child{padding:38px clamp(22px,5vw,72px)}
+.hero h1{font-size:clamp(30px,3.8vw,48px);color:#123c58;line-height:1.55}
+.hero h1 em{color:#17627a}.hero-copy{color:#435a70}.hero .eyebrow{color:#a17e42}
+.hero .primary{background:#123c58;color:#fff}.hero .outline{border-color:#123c58;color:#123c58}
+.hero-art{min-height:0;width:100%;height:350px}
+.hero-photo-frame{width:100%;height:100%;max-width:none;border:0;border-radius:0;box-shadow:none}
+.hero-photo{object-position:center 42%}.hero-photo-caption{display:none}
+.search-wrap{margin:0 auto;padding:18px 20px 10px;max-width:1050px}
+.editorial-band{padding:30px 22px;background:#f4f8fc;border:0}
+.editorial-inner{grid-template-columns:1fr 1fr;gap:30px}.editorial-copy{direction:rtl}
+.editorial-copy h2{font-size:26px}
+.editorial-visual{min-height:210px;padding:0;background:#dceaf4;border-radius:18px}
+.editorial-photo{display:block;width:100%;height:100%;min-height:210px;object-fit:cover;border-radius:18px}
+.editorial-visual:before,.editorial-visual:after,.journal-mark,.journal-overline,.journal-bottom{display:none}
+section.content{max-width:1180px;margin:22px auto 44px}#features .section-head{display:none}
+.cards{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.feature{padding:9px;border-radius:20px;min-height:0;text-align:center;overflow:hidden}
+.feature-photo{display:block;width:100%;height:150px;object-fit:cover;border-radius:14px}
+.feature-body{padding:12px 10px 14px}
+.feature-icon{width:43px;height:43px;border-radius:50%;margin:-34px auto 10px;position:relative;border:4px solid #fff;background:#fff;color:#17627a;box-shadow:0 5px 16px #10243a20}
+.feature h3{margin:8px 0;font-size:16px;color:#123c58}.feature p{font-size:12px;line-height:1.9;color:#596b7d}
+.feature-more{display:block;margin-top:9px;color:#164d6d;font-size:12px;font-weight:bold}
+.social-impact{max-width:none;margin:22px auto 0;padding:0;background:#e8f2fb}
+.social-impact-inner{max-width:none;display:grid;grid-template-columns:1.05fr .95fr;direction:ltr;gap:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+.social-impact-photo{height:310px;width:100%;border-radius:0;object-fit:cover;object-position:center 42%}
+.social-impact-copy{direction:rtl;align-self:center;padding:28px clamp(22px,5vw,70px)}
+.social-impact-icon{margin-bottom:10px;width:54px;height:54px;border-radius:50%}.social-impact h2{font-size:26px}
+footer{margin-top:0}
+@media(max-width:700px){
+ .hero-inner{grid-template-columns:1fr}.hero-inner>div:first-child{padding:26px 20px 20px}
+ .hero h1{font-size:29px}.hero-art{height:250px}
+ .editorial-inner{grid-template-columns:1fr;gap:16px}.editorial-copy h2{font-size:22px}
+ .editorial-visual,.editorial-photo{min-height:185px;height:185px}
+ .cards{grid-template-columns:1fr;gap:14px}
+ .feature{display:grid;grid-template-columns:40% 1fr;text-align:right;padding:8px}
+ .feature-photo{height:100%;min-height:150px;border-radius:12px}.feature-body{padding:10px}
+ .feature-icon{margin:0 0 8px;width:38px;height:38px}.feature h3{margin:5px 0}
+ .social-impact-inner{grid-template-columns:1fr}.social-impact-photo{height:230px}
+ .social-impact-copy{padding:24px 20px}.social-impact h2{font-size:21px}
+}
 </style>
 </head>
 <body>
@@ -308,37 +353,22 @@ footer{margin-top:90px}
     <p>پیش از مراجعه، درباره انتخاب کلینیک و نکاتی که به تصمیم بهتر کمک می‌کنند بیشتر بخوانید.</p>
     <div class="editorial-actions"><a class="btn primary" href="/magazine">مطالعه مجله دنتا</a><a class="editorial-link" href="/about">با دنتا بیشتر آشنا شوید ←</a></div>
    </div>
-   <a class="editorial-visual" href="/magazine" aria-label="رفتن به مجله دنتا">
-    <span class="journal-mark">D.</span><span class="journal-overline">مجله دنتا</span>
-    <strong>دانستن،<br>قدم اول انتخاب است.</strong>
-    <span class="journal-bottom">راهنماها • نکته‌ها • آگاهی</span>
-   </a>
+   <a class="editorial-visual" href="/magazine" aria-label="رفتن به مجله دنتا"><img class="editorial-photo" src="/denta-journal-implants.jpg" alt="تصویر ایمپلنت و دندان برای مجله دنتا" loading="lazy"></a>
   </div>
  </section>
  <section class="content" id="features">
   <div class="section-head"><span class="kicker">WHY DENTA</span><h2>دنتا چه کمکی به شما می‌کند؟</h2><p>اطلاعات را شفاف‌تر ببینید و مسیر انتخاب کلینیک را ساده‌تر طی کنید.</p></div>
   <div class="cards">
-   <a class="feature feature-link" href="#clinic-search" id="featureSearch"><div class="feature-icon">⌕</div><h3>جستجوی ساده و سریع</h3><p>برای جستجوی کلینیک‌های تأییدشده، اینجا را لمس کنید.</p></a>
-   <a class="feature feature-link" href="#clinic-search" id="featureAllClinics"><div class="feature-icon">✧</div><h3>آشنایی با کلینیک‌ها</h3><p>برای دیدن فهرست کلینیک‌های تأییدشده، اینجا را لمس کنید.</p></a>
-   <a class="feature feature-link" href="#how"><div class="feature-icon">✓</div><h3>نمایش پس از بررسی</h3><p>مراحل ثبت، بررسی و تأیید کلینیک را مشاهده کنید.</p></a>
+   <a class="feature feature-link" href="#clinic-search" id="featureAllClinics"><img class="feature-photo" src="/denta-feature-treatment.jpg" alt="دندان‌پزشک در حال معاینه بیمار" loading="lazy"><div class="feature-body"><div class="feature-icon">✓</div><h3>خدمات تخصصی</h3><p>با خدمات و امکانات کلینیک‌های ثبت‌شده آشنا شوید.</p><span class="feature-more">بیشتر بدانید ←</span></div></a>
+   <a class="feature feature-link" href="#clinic-search" id="featureSearch"><img class="feature-photo" src="/denta-feature-clinic.jpg" alt="فضای مدرن کلینیک دندان‌پزشکی" loading="lazy"><div class="feature-body"><div class="feature-icon">▦</div><h3>جستجوی آسان</h3><p>کلینیک موردنظر خود را بر اساس نام یا شهر پیدا کنید.</p><span class="feature-more">جستجوی کلینیک ←</span></div></a>
+   <a class="feature feature-link" href="/about" id="featureVerified"><img class="feature-photo" src="/denta-feature-child.jpg" alt="کودک خوشحال در کلینیک دندان‌پزشکی" loading="lazy"><div class="feature-body"><div class="feature-icon">♥</div><h3>تجربه‌ای مطمئن</h3><p>اطلاعات کلینیک‌ها را ببینید و آگاهانه انتخاب کنید.</p><span class="feature-more">بیشتر بدانید ←</span></div></a>
   </div>
- </section>
- <section class="content" id="how">
-  <div class="section-head"><span class="kicker">HOW IT WORKS</span><h2>شروع کار با دنتا، در سه قدم</h2><p>بدون پیچیدگی، مسیر آشنایی با کلینیک موردنظر خود را پیدا کنید.</p></div>
-  <div class="steps">
-   <a class="step step-link" href="#clinic-search" id="stepSearch"><h3>جستجو کنید</h3><p>برای وارد کردن نام کلینیک یا شهر و استان لمس کنید.</p></a>
-   <a class="step step-link" href="#searchResults" id="stepInfo"><h3>اطلاعات را ببینید</h3><p>برای مشاهده نتایج و اطلاعات تماس کلینیک‌های تأییدشده لمس کنید.</p></a>
-   <a class="step step-link" href="#searchResults" id="stepContact"><h3>ارتباط بگیرید</h3><p>نتایج را ببینید و از دکمه تماس هر کلینیک برای ارتباط استفاده کنید.</p></a>
-  </div>
- </section>
- <section class="content">
-  <div class="cta"><h2>مدیر یک کلینیک دندان‌پزشکی هستید؟</h2><p>کلینیک خود را در دنتا معرفی کنید تا پس از بررسی و تأیید، در فهرست کلینیک‌ها نمایش داده شود.</p><a class="btn primary" href="/register">ثبت درخواست معرفی کلینیک</a></div>
  </section>
  <section class="social-impact" aria-labelledby="socialImpactTitle">
   <div class="social-impact-inner">
    <img class="social-impact-photo" src="/denta-children-support.jpg" alt="دندان‌پزشک در حال مراقبت از سلامت دندان‌های یک کودک" loading="lazy" decoding="async">
-   <div class="social-impact-icon" aria-hidden="true">♥</div>
-   <div>
+   <div class="social-impact-copy">
+    <div class="social-impact-icon" aria-hidden="true">♥</div>
     <span class="kicker">مسئولیت اجتماعی دنتا</span>
     <h2 id="socialImpactTitle">سهمی برای لبخند کودکان کار</h2>
     <p>ما در دنتا باور داریم لبخند و فرصت زندگی بهتر، حق همه کودکان است. به همین دلیل، بخشی از درآمد دنتا را برای حمایت از کودکان کار اختصاص می‌دهیم. هدف ما این است که رشد دنتا، سهمی هم در ساختن آینده‌ای بهتر برای کودکان داشته باشد.</p>
@@ -448,24 +478,6 @@ async function searchClinics(q, location){
   button.textContent = 'جستجوی کلینیک‌ها';
  }
 }
-
-document.getElementById('stepSearch').addEventListener('click',function(){
- setTimeout(()=>document.getElementById('q').focus(),250);
-});
-
-document.getElementById('stepInfo').addEventListener('click',function(){
- searchClinics('','');
-});
-
-document.getElementById('stepContact').addEventListener('click',function(){
- const results = document.getElementById('searchResults');
- if(results.children.length){
-  results.scrollIntoView({behavior:'smooth',block:'start'});
- }else{
-  searchClinics('','');
-  setTimeout(()=>results.scrollIntoView({behavior:'smooth',block:'start'}),350);
- }
-});
 
 document.getElementById('featureSearch').addEventListener('click',function(){
  setTimeout(()=>document.getElementById('q').focus(),250);
