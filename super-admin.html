@@ -294,6 +294,7 @@ async function checkAdmin(session){
   $('loginBox').style.display='none';$('app').style.display='block';$('adminName').textContent='خوش آمدید، '+(data.full_name||'مدیر ارشد');
   await loadRequests();
   await loadUsers();
+  await loadArticles();
 }
 async function start(){
  try{
