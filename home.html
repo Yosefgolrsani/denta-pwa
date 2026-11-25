@@ -225,6 +225,18 @@ footer{margin-top:90px}
 .photo-spark{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border-radius:11px;background:#e6d2a6;color:#17334a;font-size:18px}
 @media(max-width:1024px){.hero-art{min-height:245px}.hero-photo-frame{height:235px;max-width:340px;border-radius:25px}.hero-photo-caption{right:10px;left:10px;bottom:10px;padding:9px 11px}.hero-photo-caption strong{font-size:11px}.hero-photo-caption small{font-size:9px}}
 
+
+/* Mobile hero photo: wide, prominent, not a thumbnail */
+@media(max-width:1024px){
+ .hero-art{width:100%;min-height:0;margin:4px 0 0}
+ .hero-photo-frame{width:100%;max-width:100%;height:clamp(270px,78vw,390px);border-radius:26px}
+ .hero-photo{object-position:center 42%}
+}
+@media(max-width:420px){
+ .hero-photo-frame{height:clamp(260px,82vw,330px);border-radius:22px}
+ .hero-photo-caption{right:12px;left:12px;bottom:12px}
+}
+
 </style>
 </head>
 <body>
