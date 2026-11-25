@@ -137,6 +137,82 @@ section.content{margin-top:88px;margin-bottom:88px}
 footer{background:linear-gradient(115deg,#0b1d31,#123c58);padding:48px 22px}
 @media(max-width:1024px){.hero{padding-top:58px;padding-bottom:76px}.hero-art{min-height:220px}.art-card{height:220px}.tooth-symbol{font-size:105px}.section-head h2{font-size:24px}}
 
+
+/* Complete homepage composition refresh */
+.hero{padding-top:76px;padding-bottom:91px;min-height:570px;display:flex;align-items:center}
+.hero-inner{grid-template-columns:1.08fr .92fr;gap:56px}
+.hero h1{max-width:650px;font-weight:900;line-height:1.65}
+.hero-actions{gap:14px}
+.hero-art{min-height:390px}
+.art-card{width:min(100%,440px);height:360px;border-radius:38px;overflow:visible;background:linear-gradient(145deg,#ffffff24,#ffffff08);border:1px solid #ffffff42}
+.art-glass{position:relative;z-index:2;width:76%;height:76%;border-radius:30px;border:1px solid #ffffff40;background:linear-gradient(145deg,#ffffff20,#ffffff08);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 1px #ffffff55}
+.art-label{font-size:9px;letter-spacing:2px;color:#e4d3ae}
+.art-main-title{font-size:17px;color:#fff;margin-top:4px}
+.art-subtitle{font-size:10px;color:#d3e0e8;margin-top:7px}
+.tooth-symbol{font-size:116px;line-height:1.2;color:#e8d5a9}
+.art-orbit{position:absolute;border:1px solid #e4d1a255;border-radius:50%;z-index:0}
+.orbit-one{width:310px;height:310px}
+.orbit-two{width:390px;height:390px}
+.art-floating{position:absolute;z-index:3;left:-25px;top:50px;display:flex;align-items:center;gap:10px;padding:12px 16px;border:1px solid #ffffff50;border-radius:15px;background:#f9fbf5;color:#173a51;box-shadow:0 14px 35px #06192b35}
+.art-floating>span{width:32px;height:32px;display:grid;place-items:center;border-radius:10px;background:#e9dfc8;color:#80653b}
+.art-floating b,.art-floating small{display:block}
+.art-floating b{font-size:11px}
+.art-floating small{font-size:9px;color:#718096}
+.art-caption{bottom:13px}
+.search-wrap{margin-top:-38px}
+.editorial-band{padding:64px 22px;background:linear-gradient(180deg,#eaf1f6,#f8fafc);border-top:1px solid #e1eaf0;border-bottom:1px solid #e1eaf0}
+.editorial-inner{max-width:1136px;margin:auto;display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:50px}
+.editorial-copy h2{font-size:29px;line-height:1.7;color:#123c58;margin:9px 0}
+.editorial-copy p{font-size:13px;line-height:2.2;color:#64748b;max-width:530px}
+.editorial-actions{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-top:20px}
+.editorial-link{font-size:12px;font-weight:bold;color:#245d76}
+.editorial-visual{min-height:240px;border-radius:26px;padding:26px 30px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;overflow:hidden;position:relative;color:white;background:radial-gradient(circle at 78% 20%,#6b9aa2 0,transparent 35%),linear-gradient(135deg,#102d49,#1b6073);box-shadow:0 24px 50px #123c5825}
+.editorial-visual:before,.editorial-visual:after{content:"";position:absolute;border:1px solid #e3d0a355;border-radius:50%;width:220px;height:220px;left:-60px;bottom:-130px}
+.editorial-visual:after{width:290px;height:290px;left:-95px;bottom:-165px}
+.journal-mark{position:absolute;right:22px;top:10px;font-size:115px;font-weight:900;color:#ffffff12;line-height:1}
+.journal-overline,.journal-bottom{font-size:11px;color:#e2d1a9;position:relative;z-index:1}
+.editorial-visual strong{font-size:27px;line-height:1.8;position:relative;z-index:1}
+.cards{gap:20px}
+.feature{min-height:205px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start}
+.feature h3{font-size:16px}
+.feature p{font-size:13px;line-height:2.1}
+.steps{gap:20px}
+.step{padding:25px 22px;background:linear-gradient(180deg,#fff,#f8fafc);border:1px solid #e4ebf1;border-top:3px solid #c6a66d;border-radius:16px}
+.step h3{font-size:16px}
+.step p{font-size:13px;line-height:2}
+.result-card{border-radius:20px;border-color:#e3eaf0;box-shadow:0 12px 32px #10243a0b;padding:22px}
+.result-card h3{color:#123c58}
+.result-phone{background:#eaf2f6;color:#164c68}
+.social-impact{margin-top:75px}
+.social-impact-inner{padding:35px 38px}
+footer{margin-top:90px}
+@media(max-width:1024px){
+ .hero{min-height:auto;padding-top:54px;padding-bottom:70px}
+ .hero-inner{grid-template-columns:1fr;gap:24px}
+ .hero-art{min-height:245px}
+ .art-card{height:225px;max-width:320px;border-radius:25px}
+ .art-glass{border-radius:20px}
+ .art-orbit.orbit-one{width:200px;height:200px}
+ .art-orbit.orbit-two{width:260px;height:260px}
+ .tooth-symbol{font-size:75px}
+ .art-main-title{font-size:13px}
+ .art-floating{left:-9px;top:15px;padding:8px 10px}
+ .art-caption{font-size:9px}
+ .editorial-band{padding:42px 15px}
+ .editorial-inner{grid-template-columns:1fr;gap:25px}
+ .editorial-copy h2{font-size:23px}
+ .editorial-visual{min-height:200px}
+ .editorial-visual strong{font-size:23px}
+ .feature{min-height:0}
+}
+@media(max-width:420px){
+ .hero h1{font-size:29px}
+ .hero-copy{font-size:12px}
+ .hero-actions .btn{padding:10px 14px;font-size:11px}
+ .art-floating{transform:scale(.88);transform-origin:left top}
+ .editorial-actions{gap:13px}
+}
+
 </style>
 </head>
 <body>
@@ -162,7 +238,19 @@ footer{background:linear-gradient(115deg,#0b1d31,#123c58);padding:48px 22px}
     <p class="hero-copy">در دنتا، کلینیک‌های دندان‌پزشکی را جستجو کنید، با خدمات و اطلاعات تماس آن‌ها آشنا شوید و با اطمینان بیشتری برای مراقبت از لبخندتان تصمیم بگیرید.</p>
     <div class="hero-actions"><a class="btn primary" href="#clinic-search">جستجوی کلینیک‌ها</a><a class="btn outline" href="/register">معرفی کلینیک من</a></div>
    </div>
-   <div class="hero-art" aria-hidden="true"><div class="art-card"><div class="tooth-symbol">✧</div><div class="art-caption"><span><strong>انتخاب بهتر، لبخند زیباتر</strong><br>دنتا؛ همراه شما</span><span>✦ DENTA</span></div></div></div>
+   <div class="hero-art" aria-label="نمای تصویری دنتا">
+    <div class="art-card">
+     <div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div>
+     <div class="art-glass">
+      <span class="art-label">DENTA • SMART CHOICE</span>
+      <div class="tooth-symbol">✧</div>
+      <strong class="art-main-title">لبخند، با انتخابی مطمئن</strong>
+      <span class="art-subtitle">مسیر آشنایی با کلینیک‌های دندان‌پزشکی</span>
+     </div>
+     <div class="art-floating"><span>✦</span><div><b>انتخاب آگاهانه</b><small>اطلاعات در دسترس شما</small></div></div>
+     <div class="art-caption"><span><strong>همراه انتخاب مطمئن شما</strong><br>از جستجو تا ارتباط</span><span>✦ DENTA</span></div>
+    </div>
+   </div>
   </div>
  </section>
  <div class="search-wrap" id="clinic-search">
@@ -174,6 +262,21 @@ footer{background:linear-gradient(115deg,#0b1d31,#123c58);padding:48px 22px}
   <div class="hint" id="searchHint">برای مشاهده کلینیک‌های تأییدشده، نام یا موقعیت را وارد کنید.</div>
  </div>
  <div class="results" id="searchResults" aria-live="polite"></div>
+ <section class="editorial-band" aria-label="آگاهی و انتخاب بهتر">
+  <div class="editorial-inner">
+   <div class="editorial-copy">
+    <span class="kicker">DENTA JOURNAL</span>
+    <h2>انتخاب خوب، با آگاهی شروع می‌شود</h2>
+    <p>پیش از مراجعه، درباره انتخاب کلینیک و نکاتی که به تصمیم بهتر کمک می‌کنند بیشتر بخوانید.</p>
+    <div class="editorial-actions"><a class="btn primary" href="/magazine">مطالعه مجله دنتا</a><a class="editorial-link" href="/about">با دنتا بیشتر آشنا شوید ←</a></div>
+   </div>
+   <a class="editorial-visual" href="/magazine" aria-label="رفتن به مجله دنتا">
+    <span class="journal-mark">D.</span><span class="journal-overline">مجله دنتا</span>
+    <strong>دانستن،<br>قدم اول انتخاب است.</strong>
+    <span class="journal-bottom">راهنماها • نکته‌ها • آگاهی</span>
+   </a>
+  </div>
+ </section>
  <section class="content" id="features">
   <div class="section-head"><span class="kicker">WHY DENTA</span><h2>دنتا چه کمکی به شما می‌کند؟</h2><p>اطلاعات را شفاف‌تر ببینید و مسیر انتخاب کلینیک را ساده‌تر طی کنید.</p></div>
   <div class="cards">
