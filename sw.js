@@ -1,4 +1,4 @@
-const CACHE = "denta-pwa-v4";
+const CACHE = "denta-pwa-v5";
 
 const FILES = [
   "./",
