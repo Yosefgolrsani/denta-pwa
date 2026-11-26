@@ -1,6 +1,12 @@
 <!doctype html>
 <html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#174b43">
 <title>مجله دنتا | مقاله‌های سلامت دهان و دندان</title><meta name="description" content="مقاله‌ها و راهنماهای آموزشی دنتا درباره سلامت دهان و دندان و آشنایی با خدمات دندان‌پزشکی.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:site_name" content="مجله دنتا">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="og:title" content="مجله دنتا | مقاله‌های سلامت دهان و دندان">
+<meta property="og:description" content="راهنماها و مقاله‌های آموزشی دنتا درباره سلامت دهان و دندان.">
+<meta property="og:url" content="https://denta-clinic.ir/magazine">
 <link rel="canonical" href="https://denta-clinic.ir/magazine">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap');
@@ -51,6 +57,10 @@ async function load(){
    if(!a){list.textContent='این مقاله پیدا نشد یا هنوز منتشر نشده است.';return}
    document.getElementById('listing').style.display='none';document.getElementById('detail').style.display='block';
    document.title=(a.seo_title||a.title)+' | مجله دنتا';
+   let canonical=document.querySelector('link[rel="canonical"]');if(canonical)canonical.href=location.origin+'/magazine?slug='+encodeURIComponent(a.slug);
+   const ogTitle=document.querySelector('meta[property="og:title"]');if(ogTitle)ogTitle.content=document.title;
+   const ogDesc=document.querySelector('meta[property="og:description"]');if(ogDesc)ogDesc.content=a.seo_description||a.excerpt||a.title;
+   const ogUrl=document.querySelector('meta[property="og:url"]');if(ogUrl)ogUrl.content=location.origin+'/magazine?slug='+encodeURIComponent(a.slug);
    document.querySelector('meta[name="description"]').content=a.seo_description||a.excerpt||a.title;
    document.getElementById('title').textContent=a.title;document.getElementById('excerpt').textContent=a.excerpt||'';
    document.getElementById('content').textContent=a.content;
