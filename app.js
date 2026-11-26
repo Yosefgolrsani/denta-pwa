@@ -696,6 +696,19 @@ savePasswordBtn.addEventListener('click', async () => {
 
 async function afterLogin(session) {
   currentUser = session.user;
+
+  // حساب مدیر ارشد باید همیشه وارد پنل مدیر ارشد شود، نه پنل مدیریت کلینیک.
+  const { data: adminProfile, error: adminCheckError } = await supabase
+    .from('admins')
+    .select('role')
+    .eq('id', currentUser.id)
+    .maybeSingle();
+
+  if (!adminCheckError && adminProfile?.role === 'super_admin') {
+    window.location.replace('/super-admin.html');
+    return;
+  }
+
   await loadClinicContext();
   await loadFinancePermissionManagement();
   await loadOwnerSecretaryManagement();
