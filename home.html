@@ -368,6 +368,29 @@ footer{margin-top:0}
  .social-impact-copy{text-align:right}
 }
 
+
+/* Trust and FAQ sections */
+.trust-section{padding:64px 22px;background:linear-gradient(180deg,#f4f8fc,#fff);border-top:1px solid #e3ebf2;border-bottom:1px solid #e3ebf2}
+.trust-inner,.faq-inner{max-width:1180px;margin:auto}
+.trust-heading{text-align:center;max-width:700px;margin:0 auto 28px}
+.trust-heading h2{font-size:28px;color:#123c58;margin:8px 0}
+.trust-heading p{font-size:13px;line-height:2.1;color:#64748b;margin:0}
+.trust-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.trust-card{background:#fff;border:1px solid #e1eaf1;border-radius:20px;padding:22px;box-shadow:0 10px 30px #10243a08}
+.trust-card>span{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:#eaf2f6;color:#164d6d;font-size:22px;font-weight:bold}
+.trust-card h3{font-size:15px;color:#123c58;margin:14px 0 7px}
+.trust-card p{font-size:12px;line-height:2;color:#64748b;margin:0}
+.trust-note{margin:18px auto 0;padding:13px 17px;max-width:900px;border-radius:14px;background:#f7f2e7;color:#69552f;font-size:11px;line-height:2;text-align:center}
+.faq-section{padding:64px 22px;background:#fff}
+.faq-inner{max-width:900px}
+.faq-section details{border:1px solid #e3eaf0;border-radius:15px;padding:16px 19px;margin:11px 0;background:#fbfcfe}
+.faq-section summary{cursor:pointer;font-size:14px;font-weight:bold;color:#123c58}
+.faq-section details p{font-size:12px;line-height:2.1;color:#64748b;margin:12px 0 0}
+.faq-cta{display:flex;align-items:center;gap:15px;flex-wrap:wrap;margin-top:24px;padding:22px;border-radius:18px;background:#eef4f8;color:#123c58}
+.faq-cta span{font-size:12px;color:#64748b;flex:1}
+@media(max-width:900px){.trust-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.trust-section,.faq-section{padding:42px 15px}.trust-heading h2{font-size:23px}.trust-grid{grid-template-columns:1fr}.trust-card{padding:18px}.faq-cta{align-items:flex-start;flex-direction:column}.faq-cta .btn{width:100%}}
+
 </style>
 </head>
 <body>
@@ -378,6 +401,8 @@ footer{margin-top:0}
    <a class="optional" href="/about">درباره دنتا</a>
    <a class="optional" href="/magazine">مجله دنتا</a>
    <a class="optional" href="#features">امکانات</a>
+   <a class="optional" href="#trust">اعتماد و شفافیت</a>
+   <a class="optional" href="#faq">سؤالات متداول</a>
    <a class="optional" href="#clinic-search">جستجوی کلینیک</a>
    <a href="/panel">ورود مدیران</a>
    <a class="btn primary" href="/register">ثبت کلینیک</a>
@@ -429,6 +454,29 @@ footer{margin-top:0}
    <a class="feature feature-link" href="/about" id="featureVerified"><img class="feature-photo" src="/denta-feature-child.jpg" alt="کودک خوشحال در کلینیک دندان‌پزشکی" loading="lazy"><div class="feature-body"><div class="feature-icon">♥</div><h3>تجربه‌ای مطمئن</h3><p>اطلاعات کلینیک‌ها را ببینید و آگاهانه انتخاب کنید.</p><span class="feature-more">بیشتر بدانید ←</span></div></a>
   </div>
  </section>
+
+ <section class="trust-section" id="trust" aria-labelledby="trustTitle">
+  <div class="trust-inner">
+   <div class="trust-heading"><span class="kicker">اعتماد و شفافیت</span><h2 id="trustTitle">چرا دنتا را انتخاب کنیم؟</h2><p>اعتماد با اطلاعات روشن، پاسخ‌گویی و رعایت حقوق کاربران ساخته می‌شود. دنتا تلاش می‌کند مسیر آشنایی با کلینیک‌ها را شفاف‌تر کند.</p></div>
+   <div class="trust-grid">
+    <article class="trust-card"><span>✓</span><h3>بررسی اطلاعات کلینیک</h3><p>درخواست‌های ثبت کلینیک پیش از انتشار توسط مدیریت بررسی می‌شوند؛ ثبت درخواست به‌تنهایی به معنی تأیید نیست.</p></article>
+    <article class="trust-card"><span>⌕</span><h3>اطلاعات روشن</h3><p>کاربران می‌توانند اطلاعات معرفی، موقعیت و راه‌های تماس کلینیک را در دسترس داشته باشند.</p></article>
+    <article class="trust-card"><span>♙</span><h3>مسئولیت اطلاعات</h3><p>کلینیک‌ها باید اطلاعات صحیح و به‌روز ارائه کنند و مسئولیت محتوای ارسالی خود را بپذیرند.</p></article>
+    <article class="trust-card"><span>♡</span><h3>احترام به حریم خصوصی</h3><p>انتشار اطلاعات و تصاویر بیماران باید با رضایت معتبر و رعایت محرمانگی انجام شود.</p></article>
+   </div>
+   <div class="trust-note">نشان تأیید فقط پس از بررسی مدارک و اطلاعات مربوط نمایش داده می‌شود. دنتا جایگزین مشاوره یا تشخیص پزشکی نیست.</div>
+  </div>
+ </section>
+ <section class="faq-section" id="faq" aria-labelledby="faqTitle">
+  <div class="faq-inner">
+   <div class="trust-heading"><span class="kicker">پاسخ پرسش‌های شما</span><h2 id="faqTitle">سؤالات متداول</h2><p>پاسخ کوتاه به پرسش‌های رایج بیماران و مدیران کلینیک‌ها.</p></div>
+   <details><summary>آیا ثبت کلینیک در دنتا رایگان است؟</summary><p>ثبت درخواست معرفی اولیه از طریق بخش ثبت کلینیک انجام می‌شود. هرگونه خدمت ویژه یا هزینه احتمالی باید پیش از فعال‌سازی، شفاف به مدیر کلینیک اعلام شود.</p></details>
+   <details><summary>چطور اطلاعات کلینیک خود را ثبت یا اصلاح کنم؟</summary><p>مدیر یا نماینده مجاز کلینیک می‌تواند از بخش ثبت کلینیک درخواست خود را ارسال کند و برای اصلاح اطلاعات از طریق پنل مربوط اقدام کند.</p></details>
+   <details><summary>آیا دنتا کیفیت درمان یا نتیجه پزشکی را تضمین می‌کند؟</summary><p>خیر. دنتا بستری برای معرفی و جستجوی اطلاعات کلینیک‌هاست و تضمین‌کننده نتیجه درمان نیست. برای انتخاب درمان با پزشک واجد صلاحیت مشورت کنید.</p></details>
+   <details><summary>چگونه از امکانات ویژه استفاده کنم؟</summary><p>ابتدا کلینیک را ثبت کنید. شرایط، امکانات و هزینه هر خدمت ویژه باید پیش از خرید به‌صورت روشن در اختیار شما قرار گیرد.</p></details>
+   <div class="faq-cta"><strong>مدیر کلینیک هستید؟</strong><span>برای شروع معرفی کلینیک خود درخواست ثبت کنید.</span><a class="btn primary" href="/register">ثبت کلینیک</a></div>
+  </div>
+ </section>
  <section class="social-impact" aria-labelledby="socialImpactTitle">
   <div class="social-impact-inner">
    <img class="social-impact-photo" src="/denta-children-support.jpg" alt="دندان‌پزشک در حال مراقبت از سلامت دندان‌های یک کودک" loading="lazy" decoding="async">
@@ -445,7 +493,7 @@ footer{margin-top:0}
 <footer>
  <strong>DENTA | دنتا</strong>
  <p>سامانه معرفی کلینیک‌های دندان‌پزشکی</p>
- <a href="/">صفحه اصلی</a><a href="/about">درباره ما</a><a href="/magazine">مجله دنتا</a><a href="/register">ثبت کلینیک</a><a href="/panel">پنل مدیریت</a>
+ <a href="/">صفحه اصلی</a><a href="/about">درباره ما</a><a href="/magazine">مجله دنتا</a><a href="/register">ثبت کلینیک</a><a href="#trust">اعتماد و شفافیت</a><a href="#faq">سؤالات متداول</a><a href="/panel">پنل مدیریت</a>
  <p>© تمامی حقوق برای دنتا محفوظ است.</p>
 </footer>
 <script>
