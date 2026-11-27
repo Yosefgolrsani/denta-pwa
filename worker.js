@@ -7,7 +7,7 @@ export default {
       return env.ASSETS.fetch(new Request(new URL("/home.html", url), request));
     }
 
-    // ورود مدیران: مسیر را به فایل واقعی پنل هدایت می‌کنیم
+    // صفحه اخبار پزشکی دنتا\n    if (url.pathname === "/news" || url.pathname === "/news/") {\n      return env.ASSETS.fetch(new Request(new URL("/news.html", url), request));\n    }\n\n    // ورود مدیران: مسیر را به فایل واقعی پنل هدایت می‌کنیم
     if (url.pathname === "/panel" || url.pathname === "/panel/") {
       return Response.redirect(new URL("/index.html", url), 302);
     }
