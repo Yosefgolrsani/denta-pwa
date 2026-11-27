@@ -112,6 +112,26 @@ button:disabled{opacity:.55;cursor:wait}
 <div id="articleList"><p class="muted">در حال بارگذاری مقاله‌ها...</p></div>
 </div>
 
+
+<div class="card" id="newsAdmin">
+<h2>مدیریت اخبار پزشکی دنتا</h2>
+<p class="muted">خبرهای دندان‌پزشکی و سلامت دهان را با ذکر نام منبع و لینک خبر ثبت کنید. فقط خبرهای بررسی‌شده را منتشر کنید.</p>
+<form id="newsForm">
+<input type="hidden" id="newsId">
+<label for="newsTitle">عنوان خبر</label><input id="newsTitle" required maxlength="180">
+<label for="newsSlug">نشانی انگلیسی خبر</label><input id="newsSlug" required pattern="[a-z0-9-]+" placeholder="new-dental-technology">
+<label for="newsSummary">خلاصه خبر</label><textarea id="newsSummary" maxlength="500"></textarea>
+<label for="newsContent">متن خبر و توضیحات</label><textarea id="newsContent" required style="min-height:190px"></textarea>
+<label for="newsCover">نشانی تصویر خبر (اختیاری)</label><input id="newsCover" type="url" placeholder="https://...">
+<label for="newsCategory">دسته‌بندی</label><select id="newsCategory"><option>دندان‌پزشکی</option><option>سلامت دهان و دندان</option><option>فناوری‌های درمانی</option><option>پژوهش‌های پزشکی</option><option>همایش‌ها و رویدادها</option></select>
+<label for="newsSourceName">نام منبع خبر</label><input id="newsSourceName" required maxlength="120" placeholder="نام رسانه یا سازمان علمی">
+<label for="newsSourceUrl">لینک منبع اصلی</label><input id="newsSourceUrl" type="url" required placeholder="https://...">
+<label for="newsStatus">وضعیت انتشار</label><select id="newsStatus"><option value="draft">پیش‌نویس</option><option value="published">منتشر شود</option></select>
+<div class="actions" style="margin-top:14px"><button class="primary" type="submit" id="saveNewsBtn">ذخیره خبر</button><button class="soft" type="button" id="cancelNewsEdit">پاک کردن فرم</button></div>
+</form>
+<div id="newsMessage" class="message hidden" aria-live="polite"></div>
+<div id="newsListAdmin"><p class="muted">در حال بارگذاری خبرها...</p></div>
+</div>
 <div class="card" id="accountPasswordCard">
 <h2>تغییر رمز عبور مدیر ارشد</h2>
 <p class="muted">اگر با لینک بازیابی وارد پنل شده‌اید اما فرم تغییر رمز نمایش داده نشده، از این بخش رمز جدید تعیین کنید.</p>
@@ -178,6 +198,7 @@ async function review(id,decision,note,button){
   message($('appMessage'),decision==='approved'?'کلینیک تأیید شد و مدیر آن به‌صورت خودکار عضو کلینیک شد.':'درخواست با موفقیت رد شد.','success');
   await loadRequests();
   await loadArticles();
+  await loadNewsAdmin();
 }
 let clinicRows=[];
 async function loadUsers(){
@@ -287,6 +308,57 @@ $('articleForm').addEventListener('submit',async e=>{
  articleMsg('مقاله ذخیره شد.','success');resetArticleForm();await loadArticles();
 });
 $('cancelArticleEdit').addEventListener('click',resetArticleForm);
+
+let newsRows=[];
+function newsMessage(text,type){message($('newsMessage'),text,type)}
+function resetNewsForm(){
+ $('newsForm').reset();$('newsId').value='';$('saveNewsBtn').textContent='ذخیره خبر';
+}
+async function loadNewsAdmin(){
+ const root=$('newsListAdmin');if(!root)return;
+ const {data,error}=await client.from('denta_news').select('*').order('updated_at',{ascending:false});
+ if(error){root.textContent='جدول اخبار هنوز راه‌اندازی نشده است. فایل supabase/denta-news.sql را در Supabase اجرا کنید. جزئیات: '+error.message;return}
+ newsRows=data||[];root.replaceChildren();
+ if(!newsRows.length){const p=document.createElement('p');p.className='muted';p.textContent='هنوز خبری ثبت نشده است.';root.appendChild(p);return}
+ newsRows.forEach(n=>{
+  const card=document.createElement('article');card.className='request';
+  const h=document.createElement('h3');h.textContent=n.title;card.appendChild(h);
+  const meta=document.createElement('div');meta.className='meta';
+  addLine(meta,'نشانی','/news?slug='+n.slug);addLine(meta,'دسته‌بندی',n.category);addLine(meta,'منبع',n.source_name);addLine(meta,'وضعیت',n.status==='published'?'منتشرشده':'پیش‌نویس');card.appendChild(meta);
+  const actions=document.createElement('div');actions.className='request-actions';
+  const edit=document.createElement('button');edit.className='soft';edit.textContent='ویرایش';
+  edit.addEventListener('click',()=>{
+   $('newsId').value=n.id;$('newsTitle').value=n.title;$('newsSlug').value=n.slug;$('newsSummary').value=n.summary||'';
+   $('newsContent').value=n.content;$('newsCover').value=n.cover_image_url||'';$('newsCategory').value=n.category||'دندان‌پزشکی';
+   $('newsSourceName').value=n.source_name;$('newsSourceUrl').value=n.source_url;$('newsStatus').value=n.status;
+   $('saveNewsBtn').textContent='ذخیره تغییرات';$('newsAdmin').scrollIntoView({behavior:'smooth'});
+  });
+  const del=document.createElement('button');del.className='danger';del.textContent='حذف';
+  del.addEventListener('click',async()=>{
+   if(!confirm('این خبر حذف شود؟'))return;
+   const {error}=await client.from('denta_news').delete().eq('id',n.id);
+   if(error){newsMessage('حذف خبر ناموفق بود: '+error.message,'error');return}
+   newsMessage('خبر حذف شد.','success');await loadNewsAdmin();
+  });
+  actions.append(edit,del);card.appendChild(actions);root.appendChild(card);
+ });
+}
+$('newsForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const slug=$('newsSlug').value.trim().toLowerCase();
+ if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)){newsMessage('نشانی خبر باید با حروف انگلیسی کوچک، عدد و خط تیره باشد.','error');return}
+ const sourceUrl=$('newsSourceUrl').value.trim();
+ try{const u=new URL(sourceUrl);if(!['http:','https:'].includes(u.protocol))throw new Error()}catch{newsMessage('لینک منبع معتبر نیست.','error');return}
+ const payload={title:$('newsTitle').value.trim(),slug,summary:$('newsSummary').value.trim()||null,content:$('newsContent').value.trim(),cover_image_url:$('newsCover').value.trim()||null,category:$('newsCategory').value,source_name:$('newsSourceName').value.trim(),source_url:sourceUrl,status:$('newsStatus').value};
+ const id=$('newsId').value;if(id)payload.id=id;else payload.author_id=(await client.auth.getUser()).data.user.id;
+ $('saveNewsBtn').disabled=true;
+ const {error}=await client.from('denta_news').upsert(payload);
+ $('saveNewsBtn').disabled=false;
+ if(error){newsMessage('ذخیره خبر انجام نشد: '+error.message,'error');return}
+ newsMessage('خبر ذخیره شد.','success');resetNewsForm();await loadNewsAdmin();
+});
+$('cancelNewsEdit').addEventListener('click',resetNewsForm);
+
 async function checkAdmin(session){
   if(!session){showLogin('برای ورود، ایمیل و رمز عبور مدیر ارشد را وارد کن.');return}
   const {data,error}=await client.from('admins').select('full_name,role').eq('id',session.user.id).maybeSingle();
