@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#123c58">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<title>تقویم آنلاین و مناسبت‌ها | دنتا</title>
+<meta name="description" content="تقویم آنلاین شمسی دنتا؛ مشاهده تاریخ امروز، تعطیلات رسمی و مناسبت‌های ملی و مذهبی ایران در سال ۱۴۰۵.">
+<link rel="canonical" href="https://denta-clinic.ir/calendar">
+<meta name="robots" content="index,follow">
+<style>
+:root{--navy:#123c58;--blue:#17627a;--gold:#c7a66a;--ink:#172d42;--muted:#718096;--line:#e4eaf1;--bg:#f4f7fb;--red:#c44b55}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Tahoma,"Segoe UI",Arial,sans-serif;line-height:1.9}
+a{text-decoration:none;color:inherit}button,select{font:inherit}
+header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;box-shadow:0 5px 20px #123c580b}
+.nav{max-width:1100px;margin:auto;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.logo{display:flex;align-items:center;gap:9px;color:var(--navy);font-weight:900;font-size:22px}.logo img{width:42px;height:42px;object-fit:contain}.logo small{display:block;font-size:10px;color:var(--muted);font-weight:400}
+.navlinks{display:flex;gap:18px;align-items:center;font-size:13px;color:#42566a}.navlinks a:hover{color:var(--gold)}
+main{max-width:1100px;margin:34px auto;padding:0 18px}
+.intro{background:linear-gradient(120deg,#0c2036,#123c58 60%,#17627a);color:#fff;border-radius:24px;padding:28px 30px;margin-bottom:22px;position:relative;overflow:hidden}
+.intro:after{content:"";position:absolute;width:260px;height:260px;border:1px solid #ffffff25;border-radius:50%;left:-80px;top:-130px}
+.eyebrow{color:#e4c98e;font-size:12px;font-weight:bold}.intro h1{font-size:clamp(25px,4vw,36px);margin:5px 0}.intro p{margin:0;color:#dce7ef;font-size:13px}
+.today{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:17px;padding:15px 19px;margin-bottom:18px}
+.today strong{color:var(--navy);font-size:17px}.today span{font-size:12px;color:var(--muted)}
+.layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(270px,.8fr);gap:18px;align-items:start}
+.panel{background:#fff;border:1px solid var(--line);border-radius:19px;padding:19px;box-shadow:0 8px 28px #10243a08}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
+.toolbar h2{font-size:20px;margin:0;color:var(--navy)}
+.controls{display:flex;align-items:center;gap:7px}
+.controls button,.controls select{border:1px solid var(--line);background:#f8fafc;color:var(--navy);border-radius:10px;padding:8px 11px;cursor:pointer}
+.controls button:hover{border-color:var(--gold);background:#fff}
+.weekdays,.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.weekdays div{text-align:center;color:var(--muted);font-size:11px;font-weight:bold;padding:7px 0}
+.day{min-height:67px;border:1px solid #edf1f5;background:#fff;border-radius:11px;padding:6px 4px;text-align:center;cursor:pointer;position:relative;color:var(--ink)}
+.day:hover{border-color:var(--gold);background:#fffcf5}.day.muted{opacity:.35;cursor:default}.day.friday{background:#fff8f8;color:var(--red)}.day.holiday{background:#fff4f3;border-color:#f2d6d7}.day.today{outline:2px solid var(--blue);outline-offset:-2px;background:#edf7fb}.day.selected{background:#eaf2f8;border:2px solid var(--navy);padding:5px 3px}
+.day-num{font-size:16px;font-weight:bold;display:block;line-height:1.7}.day-mark{display:block;font-size:9px;line-height:1.35;color:var(--red);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:13px;color:var(--muted);font-size:11px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:5px;background:var(--red)}.dot.blue{background:var(--blue)}.dot.gold{background:var(--gold)}
+.side h2{font-size:18px;color:var(--navy);margin:0 0 10px}.selected-date{font-size:12px;color:var(--muted);margin-bottom:12px}
+.event{padding:11px 12px;border:1px solid var(--line);border-radius:12px;margin:9px 0;background:#fbfcfe}
+.event strong{display:block;font-size:13px;color:var(--ink)}.event small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.event.holiday{border-right:3px solid var(--red)}.event.normal{border-right:3px solid var(--gold)}
+.empty{padding:20px;text-align:center;background:#f8fafc;border-radius:12px;color:var(--muted);font-size:12px}
+.source{font-size:10px;color:var(--muted);margin-top:15px}.source a{color:var(--blue);text-decoration:underline}
+.month-events{margin-top:18px}.month-events h3{font-size:15px;color:var(--navy);margin:0 0 8px}
+footer{text-align:center;padding:25px 15px;background:#0c2036;color:#dce7ef;font-size:12px;margin-top:45px}footer a{color:#e4c98e;margin:0 8px}
+@media(max-width:760px){.nav{align-items:flex-start}.navlinks{gap:10px;font-size:11px}.navlinks .optional{display:none}main{margin-top:20px;padding:0 12px}.intro{padding:22px 19px}.layout{grid-template-columns:1fr}.panel{padding:13px}.day{min-height:57px;padding:4px 1px}.day-num{font-size:14px}.day-mark{font-size:8px}.toolbar{align-items:flex-start;flex-direction:column}.controls{width:100%;justify-content:space-between}.controls select{flex:1}}
+</style>
+</head>
+<body>
+<header><div class="nav">
+<a class="logo" href="/"><img src="/denta-logo.svg" alt="دنتا"><span>DENTA<small>همراه انتخاب مطمئن شما</small></span></a>
+<nav class="navlinks"><a href="/">صفحه اصلی</a><a class="optional" href="/magazine">مجله دنتا</a><a class="optional" href="/news">اخبار پزشکی</a><a href="/register">ثبت کلینیک</a></nav>
+</div></header>
+<main>
+<section class="intro"><span class="eyebrow">DENTA CALENDAR</span><h1>تقویم آنلاین و مناسبت‌ها</h1><p>تاریخ امروز، تعطیلات رسمی و مناسبت‌های ملی و مذهبی ایران را در یک نگاه ببینید.</p></section>
+<div class="today"><div><strong id="todayFa">در حال دریافت تاریخ امروز…</strong><br><span id="todayEn"></span></div><span>تقویم رسمی هجری شمسی</span></div>
+<div class="layout">
+<section class="panel">
+<div class="toolbar"><h2 id="monthTitle">تقویم</h2><div class="controls"><button id="prev" aria-label="ماه قبل">‹</button><select id="monthSelect" aria-label="انتخاب ماه"></select><button id="next" aria-label="ماه بعد">›</button><button id="todayBtn">امروز</button></div></div>
+<div class="weekdays"><div>شنبه</div><div>یکشنبه</div><div>دوشنبه</div><div>سه‌شنبه</div><div>چهارشنبه</div><div>پنجشنبه</div><div>جمعه</div></div>
+<div class="days" id="daysGrid"></div>
+<div class="legend"><span><i class="dot blue"></i>امروز</span><span><i class="dot"></i>تعطیل رسمی</span><span><i class="dot gold"></i>مناسبت</span></div>
+<div class="source">اطلاعات مناسبت‌های سال ۱۴۰۵ بر پایه داده‌های تقویم رسمی مرکز تقویم دانشگاه تهران گردآوری شده است. <a href="https://farsiui.ir/calendar" target="_blank" rel="noopener">اطلاعات منبع تقویم</a></div>
+</section>
+<aside class="panel side"><h2>مناسبت‌های روز انتخاب‌شده</h2><div class="selected-date" id="selectedDate"></div><div id="dayEvents"><div class="empty">برای دیدن مناسبت‌ها، یک روز را انتخاب کنید.</div></div></aside>
+</div>
+<section class="panel month-events"><h3>مناسبت‌های این ماه</h3><div id="monthEvents"><div class="empty">در حال دریافت مناسبت‌ها…</div></div></section>
+</main>
+<footer><strong>DENTA | دنتا</strong><p><a href="/">صفحه اصلی</a><a href="/about">درباره دنتا</a><a href="/magazine">مجله دنتا</a><a href="/news">اخبار پزشکی</a></p><span>© تمامی حقوق برای دنتا محفوظ است.</span></footer>
+<script>
+const months=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+const faNum=n=>new Intl.NumberFormat('fa-IR').format(n);
+const fmt=new Intl.DateTimeFormat('en-US-u-ca-persian-nu-latn',{timeZone:'Asia/Tehran',year:'numeric',month:'numeric',day:'numeric'});
+function parts(date){const o={};for(const p of fmt.formatToParts(date))if(p.type!=='literal')o[p.type]=Number(p.value);return {y:o.year,m:o.month,d:o.day};}
+function dateAtJalaliDay(y,m,d){const guess=new Date(Date.UTC(y+621,m+1,15));for(let k=-25;k<=25;k++){const x=new Date(guess);x.setUTCDate(x.getUTCDate()+k);const p=parts(x);if(p.y===y&&p.m===m&&p.d===d)return x;}return null;}
+function iranToday(){const p=parts(new Date());return {y:p.y,m:p.m,d:p.d};}
+const today=iranToday();let view={y:today.y,m:today.m};let selected={...today};let events=[];
+document.getElementById('monthSelect').innerHTML=months.map((m,i)=>'<option value="'+(i+1)+'">'+m+'</option>').join('');
+document.getElementById('todayFa').textContent=new Intl.DateTimeFormat('fa-IR',{timeZone:'Asia/Tehran',dateStyle:'full'}).format(new Date());
+document.getElementById('todayEn').textContent=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tehran',dateStyle:'long'}).format(new Date());
+function key(y,m,d){return y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0')}
+function eventsFor(y,m,d){return events.filter(e=>e.date===key(y,m,d))}
+function render(){
+ document.getElementById('monthTitle').textContent=months[view.m-1]+' '+faNum(view.y);
+ document.getElementById('monthSelect').value=String(view.m);
+ const first=dateAtJalaliDay(view.y,view.m,1);if(!first){document.getElementById('daysGrid').innerHTML='<div class="empty">تاریخ این ماه در دسترس نیست.</div>';return;}
+ const start=(first.getUTCDay()+1)%7;const next=view.m===12?dateAtJalaliDay(view.y+1,1,1):dateAtJalaliDay(view.y,view.m+1,1);
+ const count=Math.round((next-first)/86400000);const cells=Math.ceil((start+count)/7)*7;let html='';
+ for(let i=0;i<cells;i++){const day=i-start+1;if(day<1||day>count){html+='<div class="day muted"></div>';continue;}
+  const ev=eventsFor(view.y,view.m,day);const dt=new Date(first);dt.setUTCDate(dt.getUTCDate()+day-1);const friday=dt.getUTCDay()===5;const isToday=view.y===today.y&&view.m===today.m&&day===today.d;const isSel=view.y===selected.y&&view.m===selected.m&&day===selected.d;
+  const holiday=ev.some(e=>e.isHoliday);const mark=ev.length?(ev[0].title?.fa||'مناسبت'):'';
+  html+='<button class="day '+(friday?'friday ':'')+(holiday?'holiday ':'')+(isToday?'today ':'')+(isSel?'selected':'')+'" data-day="'+day+'"><span class="day-num">'+faNum(day)+'</span><span class="day-mark">'+(holiday?'تعطیل':mark)+'</span></button>';
+ }
+ document.getElementById('daysGrid').innerHTML=html;
+ document.querySelectorAll('.day[data-day]').forEach(b=>b.addEventListener('click',()=>{selected={y:view.y,m:view.m,d:Number(b.dataset.day)};render();renderSelected();}));
+ renderSelected();renderMonthEvents();
+}
+function renderSelected(){
+ document.getElementById('selectedDate').textContent=faNum(selected.d)+' '+months[selected.m-1]+' '+faNum(selected.y);
+ const list=eventsFor(selected.y,selected.m,selected.d);document.getElementById('dayEvents').innerHTML=list.length?list.map(e=>'<div class="event '+(e.isHoliday?'holiday':'normal')+'"><strong>'+(e.title?.fa||'مناسبت')+'</strong><small>'+(e.isHoliday?'تعطیل رسمی':'مناسبت ثبت‌شده')+'</small></div>').join(''):'<div class="empty">برای این روز مناسبتی در فهرست ثبت نشده است.</div>';
+}
+function renderMonthEvents(){
+ const list=events.filter(e=>{const p=e.date.split('-').map(Number);return p[0]===view.y&&p[1]===view.m}).sort((a,b)=>a.date.localeCompare(b.date));
+ document.getElementById('monthEvents').innerHTML=list.length?list.map(e=>{const p=e.date.split('-').map(Number);return '<div class="event '+(e.isHoliday?'holiday':'normal')+'"><strong>'+faNum(p[2])+' '+(e.title?.fa||'مناسبت')+'</strong><small>'+(e.isHoliday?'تعطیل رسمی':'مناسبت')+'</small></div>'}).join(''):'<div class="empty">مناسبتی برای این ماه در فهرست ثبت نشده است.</div>';
+}
+function move(n){let m=view.m+n,y=view.y;if(m<1){m=12;y--}if(m>12){m=1;y++}view={y,m};selected={y,m,d:1};render()}
+document.getElementById('prev').onclick=()=>move(-1);document.getElementById('next').onclick=()=>move(1);
+document.getElementById('monthSelect').onchange=e=>{view.m=Number(e.target.value);selected={y:view.y,m:view.m,d:1};render()};
+document.getElementById('todayBtn').onclick=()=>{view={...today};selected={...today};render()};
+async function loadEvents(){
+ try{const base='https://raw.githubusercontent.com/MiladJoodi/FarsiUI/main/calendar/years/1405/';
+  const [h,e]=await Promise.all([fetch(base+'holidays.json'),fetch(base+'events.json')]);
+  if(!h.ok||!e.ok)throw new Error('calendar data unavailable');
+  const [hd,ed]=await Promise.all([h.json(),e.json()]);events=[...(hd.items||[]),...(ed.items||[])];
+  if(today.y!==1405){document.querySelector('.source').textContent='داده‌های منتشرشدهٔ این نسخه مربوط به سال ۱۴۰۵ است؛ برای سال‌های دیگر به‌روزرسانی تقویم لازم است.'}
+ }catch(err){document.getElementById('dayEvents').innerHTML='<div class="empty">دریافت فهرست مناسبت‌ها ممکن نشد. لطفاً اتصال اینترنت را بررسی و صفحه را دوباره بارگذاری کنید.</div>';document.getElementById('monthEvents').innerHTML='<div class="empty">اطلاعات مناسبت‌ها بارگذاری نشد.</div>'}
+ render();
+}
+loadEvents();
+</script>
+</body></html>
